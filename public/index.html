@@ -276,7 +276,25 @@
     /* ═══════════════════════════════════════
        SECCIÓN GENÉRICA (RC, BANCO, etc.)
     ═══════════════════════════════════════ */
-    .seccion-screen { flex-direction: column; overflow-y: auto; }
+    .seccion-screen { flex-direction: column; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+
+    /* Barra de búsqueda */
+    .search-bar-wrap {
+      width: 100%; position: relative; margin-bottom: 4px;
+    }
+    .search-bar-wrap svg {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: rgba(255,255,255,0.3); pointer-events: none;
+    }
+    .search-input {
+      width: 100%; padding: 11px 14px 11px 42px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; color: #fff; font-size: 14px;
+      font-family: 'Inter', sans-serif; outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: rgba(220,30,30,0.5); background: rgba(255,255,255,0.09); }
+    .search-input::placeholder { color: rgba(255,255,255,0.25); }
 
     .seccion-container {
       width: 100%; max-width: 680px;
@@ -714,7 +732,7 @@
     .compra-toast.error { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.3); color: #ff8080; }
     .compra-toast.show { transform: translateY(0); opacity: 1; }
     .inventario-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; width: 100%;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; width: 100%; min-width: 0;
     }
     .inv-card {
       background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
@@ -858,14 +876,14 @@
           <div class="card-icon">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
           </div>
-          <div><div class="card-title">Tienda</div><div class="card-sub">Compra vehículos, armas y más</div></div>
+          <div><div class="card-title">🛒 Tienda</div><div class="card-sub">Compra vehículos, armas y más</div></div>
           <span class="card-arrow">›</span>
         </div>
         <div class="nav-card" onclick="abrirSeccion('inventario-screen'); cargarInventario()">
           <div class="card-icon">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
           </div>
-          <div><div class="card-title">Inventario</div><div class="card-sub">Tus objetos y compras</div></div>
+          <div><div class="card-title">🎒 Inventario</div><div class="card-sub">Tus objetos y compras</div></div>
           <span class="card-arrow">›</span>
         </div>
         <a href="#" class="nav-card" id="admin-card" style="display:none">
@@ -1259,6 +1277,10 @@
         </div>
       </div>
 
+      <div class="search-bar-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" id="tienda-search" type="text" placeholder="Buscar producto...">
+      </div>
       <div class="tienda-filtros">
         <button class="filtro-btn active" onclick="filtrarCategoria('todos', this)">🌐 Todos</button>
         <button class="filtro-btn" onclick="filtrarCategoria('vehiculos', this)">🚗 Vehículos</button>
@@ -1323,6 +1345,10 @@
       <div class="admin-panel">
         <!-- Tab Productos -->
         <div class="admin-ta-seccion visible" id="at-tab-productos">
+          <div class="search-bar-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-input" id="admin-tienda-search" type="text" placeholder="Buscar producto en admin...">
+          </div>
           <div class="rc-loading" id="at-loading">
             <div class="spinner"></div><span>Cargando productos...</span>
           </div>
@@ -2048,6 +2074,11 @@
         todosLosProductos = data.productos || [];
         document.getElementById('tienda-loading').style.display = 'none';
         document.getElementById('tienda-productos-wrap').style.display = 'block';
+        // Reset búsqueda al recargar
+        const sq = document.getElementById('tienda-search');
+        if (sq) sq.value = '';
+        categoriaActual = 'todos';
+        document.querySelectorAll('.filtro-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
         renderProductos(todosLosProductos);
       } catch(e) {
         document.getElementById('tienda-loading').style.display = 'none';
@@ -2060,9 +2091,23 @@
       categoriaActual = cat;
       document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      const filtrados = cat === 'todos' ? todosLosProductos : todosLosProductos.filter(p => p.categoria === cat);
-      renderProductos(filtrados);
+      aplicarFiltros();
     }
+
+    function aplicarFiltros() {
+      const q = (document.getElementById('tienda-search')?.value || '').trim().toLowerCase();
+      let lista = categoriaActual === 'todos' ? todosLosProductos : todosLosProductos.filter(p => p.categoria === categoriaActual);
+      if (q) lista = lista.filter(p => p.nombre.toLowerCase().includes(q));
+      renderProductos(lista);
+    }
+
+    // Listeners de búsqueda - se registran una sola vez al cargar la página
+    (function() {
+      const s = document.getElementById('tienda-search');
+      if (s) s.addEventListener('input', aplicarFiltros);
+      const sa = document.getElementById('admin-tienda-search');
+      if (sa) sa.addEventListener('input', aplicarFiltrosAdmin);
+    })();
 
     function catEmoji(cat) {
       const map = { vehiculos: '🚗', armas: '🔫', licencias: '📄', otros: '📦' };
@@ -2204,23 +2249,23 @@
       if (tab === 'productos') cargarAdminProductos();
     }
 
-    async function cargarAdminProductos() {
-      if (!currentUser?.id) return;
-      const loading = document.getElementById('at-loading');
-      const lista   = document.getElementById('at-productos-lista');
-      loading.style.display = 'flex'; lista.innerHTML = '';
+    let todosLosProductosAdmin = [];
 
-      try {
-        const res  = await fetch(`/api/tienda?action=admin_productos&admin_id=${currentUser.id}`);
-        const data = await res.json();
-        loading.style.display = 'none';
+    function aplicarFiltrosAdmin() {
+      const q = (document.getElementById('admin-tienda-search')?.value || '').trim().toLowerCase();
+      const lista = q
+        ? todosLosProductosAdmin.filter(p => p.nombre.toLowerCase().includes(q) || p.categoria.toLowerCase().includes(q))
+        : todosLosProductosAdmin;
+      renderAdminProductos(lista);
+    }
 
-        if (!data.productos?.length) {
-          lista.innerHTML = '<div class="historial-vacio">No hay productos. ¡Agrega el primero!</div>';
-          return;
-        }
-
-        lista.innerHTML = data.productos.map(p => `
+    function renderAdminProductos(lista) {
+      const el = document.getElementById('at-productos-lista');
+      if (!lista.length) {
+        el.innerHTML = '<div class="historial-vacio">No se encontraron productos.</div>';
+        return;
+      }
+      el.innerHTML = lista.map(p => `
           <div class="admin-producto-row" id="apr-${p.id}">
             <div class="apr-img">
               ${p.imagen_url
@@ -2238,6 +2283,28 @@
             </div>
           </div>
         `).join('');
+    }
+
+    async function cargarAdminProductos() {
+      if (!currentUser?.id) return;
+      const loading = document.getElementById('at-loading');
+      const lista   = document.getElementById('at-productos-lista');
+      loading.style.display = 'flex'; lista.innerHTML = '';
+
+      try {
+        const res  = await fetch(`/api/tienda?action=admin_productos&admin_id=${currentUser.id}`);
+        const data = await res.json();
+        loading.style.display = 'none';
+
+        todosLosProductosAdmin = data.productos || [];
+        if (!todosLosProductosAdmin.length) {
+          lista.innerHTML = '<div class="historial-vacio">No hay productos. ¡Agrega el primero!</div>';
+          return;
+        }
+        // Reset búsqueda al recargar
+        const sq = document.getElementById('admin-tienda-search');
+        if (sq) sq.value = '';
+        renderAdminProductos(todosLosProductosAdmin);
       } catch(e) {
         loading.style.display = 'none';
         lista.innerHTML = '<div class="historial-vacio">Error al cargar.</div>';
