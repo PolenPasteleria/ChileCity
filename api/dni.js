@@ -1,0 +1,105 @@
+import { neon } from "@neondatabase/serverless";
+
+// Genera un RUT chileno válido con formato XX.XXX.XXX-D
+function generarRut() {
+  // Número entre 10.000.000 y 25.000.000 (rango realista Chile)
+  const num = Math.floor(Math.random() * 15000000) + 10000000;
+  const dv  = calcularDV(num);
+  const str = num.toString();
+  // Formatear con puntos: XX.XXX.XXX
+  const formateado =
+    str.slice(0, 2) + "." + str.slice(2, 5) + "." + str.slice(5, 8);
+  return `${formateado}-${dv}`;
+}
+
+function calcularDV(rut) {
+  let suma  = 0;
+  let multi = 2;
+  let r     = rut;
+  while (r > 0) {
+    suma  += (r % 10) * multi;
+    r      = Math.floor(r / 10);
+    multi  = multi === 7 ? 2 : multi + 1;
+  }
+  const resto = 11 - (suma % 11);
+  if (resto === 11) return "0";
+  if (resto === 10) return "K";
+  return String(resto);
+}
+
+export default async function handler(req, res) {
+  // CORS básico
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") return res.status(200).end();
+
+  const sql = neon(process.env.DATABASE_URL);
+
+  // Crear tabla si no existe (se ejecuta en cada llamada, es idempotente)
+  await sql`
+    CREATE TABLE IF NOT EXISTS dni (
+      id           SERIAL PRIMARY KEY,
+      discord_id   TEXT UNIQUE NOT NULL,
+      rut          TEXT UNIQUE NOT NULL,
+      nombre1      TEXT NOT NULL,
+      nombre2      TEXT NOT NULL,
+      apellido1    TEXT NOT NULL,
+      apellido2    TEXT NOT NULL,
+      fecha_nac    TEXT NOT NULL,
+      nacionalidad TEXT NOT NULL DEFAULT 'Chilena',
+      created_at   TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  // ── GET: buscar DNI por discord_id ──────────────────────────────────────
+  if (req.method === "GET") {
+    const { discord_id } = req.query;
+    if (!discord_id) return res.status(400).json({ error: "Falta discord_id" });
+
+    const rows = await sql`SELECT * FROM dni WHERE discord_id = ${discord_id}`;
+    if (rows.length === 0) return res.status(404).json({ existe: false });
+
+    return res.status(200).json({ existe: true, dni: rows[0] });
+  }
+
+  // ── POST: crear nuevo DNI ────────────────────────────────────────────────
+  if (req.method === "POST") {
+    const { discord_id, nombre1, nombre2, apellido1, apellido2, fecha_nac } = req.body;
+
+    if (!discord_id || !nombre1 || !nombre2 || !apellido1 || !apellido2 || !fecha_nac) {
+      return res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
+
+    // Verificar que no exista ya
+    const existe = await sql`SELECT id FROM dni WHERE discord_id = ${discord_id}`;
+    if (existe.length > 0) {
+      return res.status(409).json({ error: "Ya tienes un DNI registrado" });
+    }
+
+    // Generar RUT único (reintenta si hay colisión)
+    let rut;
+    let intentos = 0;
+    while (intentos < 10) {
+      rut = generarRut();
+      const rutExiste = await sql`SELECT id FROM dni WHERE rut = ${rut}`;
+      if (rutExiste.length === 0) break;
+      intentos++;
+    }
+
+    const n1 = nombre1.trim().toUpperCase();
+    const n2 = nombre2.trim().toUpperCase();
+    const a1 = apellido1.trim().toUpperCase();
+    const a2 = apellido2.trim().toUpperCase();
+
+    const rows = await sql`
+      INSERT INTO dni (discord_id, rut, nombre1, nombre2, apellido1, apellido2, fecha_nac)
+      VALUES (${discord_id}, ${rut}, ${n1}, ${n2}, ${a1}, ${a2}, ${fecha_nac})
+      RETURNING *
+    `;
+
+    return res.status(201).json({ existe: true, dni: rows[0] });
+  }
+
+  return res.status(405).json({ error: "Método no permitido" });
+}
