@@ -74,14 +74,14 @@ export default async function handler(req, res) {
     `;
 
     const ahora = new Date();
-    let saldoActualizado = rows[0].saldo;
+    let saldoActualizado = Number(rows[0].saldo);
 
     for (const sueldo of sueldos) {
       const ultimoCobro = new Date(sueldo.ultimo_cobro);
       const diasDesde = (ahora - ultimoCobro) / (1000 * 60 * 60 * 24);
       if (diasDesde >= sueldo.dias) {
         // Cobrar sueldo
-        saldoActualizado += sueldo.monto;
+        saldoActualizado += Number(sueldo.monto);
         await sql`
           UPDATE banco SET saldo = saldo + ${sueldo.monto} WHERE discord_id = ${discord_id}
         `;
@@ -176,7 +176,7 @@ export default async function handler(req, res) {
     if (origen.length === 0)
       return res.status(404).json({ error: "No tienes cuenta bancaria" });
 
-    if (origen[0].saldo < montoNum)
+    if (Number(origen[0].saldo) < montoNum)
       return res.status(400).json({ error: "Saldo insuficiente" });
 
     // Buscar destino por RUT
@@ -192,8 +192,8 @@ export default async function handler(req, res) {
     if (destBanco.length === 0)
       return res.status(404).json({ error: "El destinatario no tiene cuenta bancaria" });
 
-    const nuevoSaldoOrigen = origen[0].saldo - montoNum;
-    const nuevoSaldoDest   = destBanco[0].saldo + montoNum;
+    const nuevoSaldoOrigen = Number(origen[0].saldo) - montoNum;
+    const nuevoSaldoDest   = Number(destBanco[0].saldo) + montoNum;
 
     await sql`UPDATE banco SET saldo = ${nuevoSaldoOrigen} WHERE discord_id = ${discord_id}`;
     await sql`UPDATE banco SET saldo = ${nuevoSaldoDest}   WHERE discord_id = ${destDiscordId}`;
@@ -250,7 +250,7 @@ export default async function handler(req, res) {
     const cuenta = await sql`SELECT * FROM banco WHERE discord_id = ${discord_id_target}`;
     if (cuenta.length === 0) return res.status(404).json({ error: "Usuario sin cuenta" });
 
-    const nuevoSaldo = cuenta[0].saldo + montoNum;
+    const nuevoSaldo = Number(cuenta[0].saldo) + montoNum;
     if (nuevoSaldo < 0) return res.status(400).json({ error: "Saldo no puede quedar negativo" });
 
     await sql`UPDATE banco SET saldo = ${nuevoSaldo} WHERE discord_id = ${discord_id_target}`;
