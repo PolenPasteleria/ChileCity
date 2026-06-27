@@ -2625,7 +2625,7 @@
         const data = await res.json();
         loading.style.display = 'none';
 
-        todosLosProductosAdmin = data.productos || [];
+        todosLosProductosAdmin = (data.productos || []).filter(p => p.activo !== false);
         if (!todosLosProductosAdmin.length) {
           lista.innerHTML = '<div class="historial-vacio">No hay productos. ¡Agrega el primero!</div>';
           return;
