@@ -101,6 +101,15 @@ export default async function handler(req, res) {
       const producto = productos[0];
       const precio = toNumber(producto.precio);
 
+      // Verificar que el usuario no tenga ya este producto en su inventario
+      const yaComprado = await sql`
+        SELECT id FROM inventario
+        WHERE discord_id = ${discord_id} AND producto_id = ${producto_id}
+        LIMIT 1
+      `;
+      if (yaComprado.length > 0)
+        return res.status(409).json({ error: "Ya tienes este producto en tu inventario." });
+
       // Verificar cuenta bancaria y saldo
       const cuentas = await sql`SELECT * FROM banco WHERE discord_id = ${discord_id}`;
       if (cuentas.length === 0)
@@ -309,6 +318,111 @@ export default async function handler(req, res) {
 
       await sql`DELETE FROM inventario WHERE id = ${item_id}`;
       return res.status(200).json({ ok: true });
+    }
+
+    // ── ADMIN: base de datos — todos los DNI con su inventario ─────────────
+    if (req.method === "GET" && action === "admin_base_datos") {
+      const { admin_id, q } = req.query;
+      if (!ADMIN_IDS_TIENDA.includes(admin_id))
+        return res.status(403).json({ error: "No autorizado" });
+
+      // Traer todos los DNI
+      let dnis;
+      if (q && q.trim()) {
+        const busq = `%${q.trim().toLowerCase()}%`;
+        dnis = await sql`
+          SELECT * FROM dni
+          WHERE LOWER(nombre1)   LIKE ${busq}
+             OR LOWER(nombre2)   LIKE ${busq}
+             OR LOWER(apellido1) LIKE ${busq}
+             OR LOWER(apellido2) LIKE ${busq}
+             OR LOWER(rut)       LIKE ${busq}
+          ORDER BY apellido1, nombre1
+        `;
+      } else {
+        dnis = await sql`SELECT * FROM dni ORDER BY apellido1, nombre1`;
+      }
+
+      // Traer inventarios de esos discord_ids
+      const ids = dnis.map(d => d.discord_id);
+      let inventarios = [];
+      if (ids.length > 0) {
+        inventarios = await sql`
+          SELECT * FROM inventario
+          WHERE discord_id = ANY(${ids})
+          ORDER BY comprado_at DESC
+        `;
+      }
+
+      // Agrupar inventario por discord_id
+      const invMap = {};
+      for (const item of inventarios) {
+        if (!invMap[item.discord_id]) invMap[item.discord_id] = [];
+        invMap[item.discord_id].push({ ...item, precio_pagado: toNumber(item.precio_pagado) });
+      }
+
+      return res.status(200).json({
+        registros: dnis.map(d => ({
+          discord_id: d.discord_id,
+          nombre1:   d.nombre1,
+          nombre2:   d.nombre2,
+          apellido1: d.apellido1,
+          apellido2: d.apellido2,
+          rut:       d.rut,
+          fecha_nac: d.fecha_nac,
+          inventario: invMap[d.discord_id] || [],
+        })),
+      });
+    }
+
+    // ── PUBLIC: base de datos — todos los DNI con su inventario ────────────
+    if (req.method === "GET" && action === "base_datos") {
+      const { q } = req.query;
+
+      let dnis;
+      if (q && q.trim()) {
+        const busq = `%${q.trim().toLowerCase()}%`;
+        dnis = await sql`
+          SELECT * FROM dni
+          WHERE LOWER(nombre1)   LIKE ${busq}
+             OR LOWER(nombre2)   LIKE ${busq}
+             OR LOWER(apellido1) LIKE ${busq}
+             OR LOWER(apellido2) LIKE ${busq}
+             OR LOWER(rut)       LIKE ${busq}
+          ORDER BY apellido1, nombre1
+        `;
+      } else {
+        dnis = await sql`SELECT * FROM dni ORDER BY apellido1, nombre1`;
+      }
+
+      const ids = dnis.map(d => d.discord_id);
+      let inventarios = [];
+      if (ids.length > 0) {
+        inventarios = await sql`
+          SELECT * FROM inventario
+          WHERE discord_id = ANY(${ids})
+          ORDER BY comprado_at DESC
+        `;
+      }
+
+      const invMap = {};
+      for (const item of inventarios) {
+        if (!invMap[item.discord_id]) invMap[item.discord_id] = [];
+        invMap[item.discord_id].push({ ...item, precio_pagado: toNumber(item.precio_pagado) });
+      }
+
+      return res.status(200).json({
+        registros: dnis.map(d => ({
+          discord_id: d.discord_id,
+          nombre1:    d.nombre1,
+          nombre2:    d.nombre2,
+          apellido1:  d.apellido1,
+          apellido2:  d.apellido2,
+          rut:        d.rut,
+          fecha_nac:  d.fecha_nac,
+          inventario: invMap[d.discord_id] || [],
+        })),
+      });
     }
 
     return res.status(405).json({ error: "Método no permitido" });
