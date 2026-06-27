@@ -1736,10 +1736,9 @@
       });
     }
 
-    function volverDashboard() { mostrarPantalla('dashboard'); }
+    function volverDashboard() { mostrarPantalla('dashboard'); window.history.pushState({ screen: 'dashboard' }, '', '/'); }
 
-    function abrirSeccion(id) { mostrarPantalla(id); }
-
+    
     async function goToDashboard(user) {
       currentUser = user;
       document.getElementById('discord-name').textContent = user.name;
@@ -1790,21 +1789,49 @@
 
     function goToLanding() {
       currentUser = null; currentDNI = null; currentCuenta = null;
+      localStorage.removeItem('cc_user');
       mostrarPantalla('landing');
     }
 
-    // ── Login desde URL params ────────────────────────────────────────────────
+    function abrirSeccion(id) {
+      mostrarPantalla(id);
+      window.history.pushState({ screen: id }, '', '/');
+    }
+
+    // Interceptar botón atrás del navegador/celular
+    window.addEventListener('popstate', () => {
+      if (currentUser) {
+        mostrarPantalla('dashboard');
+        window.history.pushState({ screen: 'dashboard' }, '', '/');
+      }
+    });
+
+    // ── Login desde URL params o sesión guardada ──────────────────────────────
     document.getElementById('f-fecha').max = new Date().toISOString().split('T')[0];
 
     const params = new URLSearchParams(window.location.search);
     if (params.get('name')) {
-      window.history.replaceState({}, '', '/');
-      goToDashboard({
+      const user = {
         name:   params.get('name'),
         tag:    params.get('tag'),
         avatar: params.get('avatar'),
         id:     params.get('id'),
-      });
+      };
+      localStorage.setItem('cc_user', JSON.stringify(user));
+      window.history.replaceState({ screen: 'dashboard' }, '', '/');
+      goToDashboard(user);
+    } else {
+      // Restaurar sesión si existe
+      try {
+        const saved = localStorage.getItem('cc_user');
+        if (saved) {
+          const user = JSON.parse(saved);
+          if (user && user.id) {
+            window.history.replaceState({ screen: 'dashboard' }, '', '/');
+            goToDashboard(user);
+          }
+        }
+      } catch { localStorage.removeItem('cc_user'); }
     }
 
     // ── User pill ─────────────────────────────────────────────────────────────
@@ -2677,11 +2704,19 @@
     async function adminEliminarProducto(productoId) {
       if (!confirm('¿Eliminar este producto de la tienda?')) return;
       try {
-        await fetch(`/api/tienda?action=admin_eliminar_producto&admin_id=${currentUser.id}&producto_id=${productoId}`, {
+        const r = await fetch(`/api/tienda?action=admin_eliminar_producto&admin_id=${currentUser.id}&producto_id=${productoId}`, {
           method: 'DELETE',
         });
+        if (!r.ok) { mostrarToast('Error al eliminar.', true); return; }
+        // Quitar fila del DOM directamente, sin recargar
+        const row = document.getElementById(`apr-${productoId}`);
+        if (row) row.remove();
+        // Quitar del array en memoria
+        todosLosProductosAdmin = todosLosProductosAdmin.filter(p => p.id !== productoId);
+        const listaEl = document.getElementById('at-productos-lista');
+        if (listaEl && !listaEl.children.length)
+          listaEl.innerHTML = '<div class="historial-vacio">No hay productos. ¡Agrega el primero!</div>';
         mostrarToast('Producto eliminado.');
-        cargarAdminProductos();
       } catch(e) { mostrarToast('Error al eliminar.', true); }
     }
 
