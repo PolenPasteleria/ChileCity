@@ -839,6 +839,107 @@
       .inv-admin-item-row { gap: 8px; }
       .iai-img { width: 36px; height: 36px; font-size: 18px; }
     }
+  
+    /* Botón "Ya tienes" */
+    .btn-ya-tienes {
+      background: rgba(255,255,255,0.06) !important;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+      color: rgba(255,255,255,0.35) !important;
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+
+    /* ── BASE DE DATOS ── */
+    .bd-carnet-row {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px; overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .bd-carnet-row.open { border-color: rgba(220,30,30,0.3); }
+
+    .bd-carnet-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .bd-carnet-header:hover { background: rgba(255,255,255,0.04); }
+
+    .bd-avatar {
+      width: 42px; height: 42px; border-radius: 50%; overflow: hidden;
+      border: 2px solid rgba(220,30,30,0.4); flex-shrink: 0;
+      background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center;
+    }
+    .bd-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .bd-avatar svg { opacity: 0.4; }
+
+    .bd-info { flex: 1; min-width: 0; }
+    .bd-nombre { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bd-rut    { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+    .bd-meta { text-align: right; flex-shrink: 0; }
+    .bd-fecha { font-size: 11px; color: rgba(255,255,255,0.3); }
+    .bd-items { font-size: 12px; font-weight: 700; color: rgba(220,30,30,0.8); margin-top: 2px; }
+
+    .bd-chevron { color: rgba(255,255,255,0.25); flex-shrink: 0; transition: transform 0.25s; }
+    .bd-carnet-row.open .bd-chevron { transform: rotate(180deg); }
+
+    .bd-detail {
+      display: none; padding: 0 18px 16px;
+    }
+    .bd-carnet-row.open .bd-detail { display: block; }
+
+    .bd-carnet-mini {
+      background: linear-gradient(135deg, #f5f5f0, #e8e8e0);
+      border-radius: 10px; padding: 14px 16px;
+      display: flex; gap: 14px; color: #111; margin-bottom: 12px;
+    }
+    .bd-mini-foto {
+      width: 56px; height: 68px; border-radius: 4px;
+      border: 2px solid #003087; overflow: hidden; flex-shrink: 0;
+      background: linear-gradient(160deg, #c8d8e8, #a0b8cc);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .bd-mini-foto img { width: 100%; height: 100%; object-fit: cover; }
+    .bd-mini-datos { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+    .bd-mini-campo { display: flex; flex-direction: column; }
+    .bd-mini-label { font-size: 7px; font-weight: 800; letter-spacing: 1.5px; color: #003087; text-transform: uppercase; }
+    .bd-mini-valor { font-size: 12px; font-weight: 700; color: #111; }
+    .bd-mini-rut   { font-size: 14px; font-weight: 800; color: #003087; letter-spacing: 1px; }
+
+    .bd-inv-titulo {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      color: rgba(255,255,255,0.35); margin-bottom: 8px;
+    }
+    .bd-inv-lista { display: flex; flex-direction: column; gap: 6px; }
+    .bd-inv-item {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px; padding: 8px 12px;
+    }
+    .bd-inv-item-img { width: 32px; height: 32px; border-radius: 6px; overflow: hidden;
+      background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0; }
+    .bd-inv-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .bd-inv-item-nombre { flex: 1; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.85); }
+    .bd-inv-item-precio { font-size: 11px; color: rgba(255,255,255,0.35); white-space: nowrap; }
+    .bd-inv-empty { font-size: 12px; color: rgba(255,255,255,0.25); padding: 8px 0; }
+
+    .bd-stat-bar {
+      display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .bd-stat {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 10px 16px; text-align: center;
+    }
+    .bd-stat-num { font-size: 22px; font-weight: 800; color: var(--neon2); }
+    .bd-stat-label { font-size: 10px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px; }
+
+    @media (max-width: 600px) {
+      .bd-carnet-mini { flex-direction: column; align-items: center; }
+      .bd-mini-foto { width: 48px; height: 58px; }
+    }
   </style>
 </head>
 <body>
@@ -936,6 +1037,13 @@
           <div><div class="card-title">Inventario</div><div class="card-sub">Tus objetos y compras</div></div>
           <span class="card-arrow">›</span>
         </div>
+        <div class="nav-card" onclick="abrirSeccion('base-datos-screen'); cargarBaseDatos()">
+          <div class="card-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </div>
+          <div><div class="card-title">Base de Datos</div><div class="card-sub">Carnets registrados en la ciudad</div></div>
+          <span class="card-arrow">›</span>
+        </div>
         <a href="#" class="nav-card" id="admin-card" style="display:none">
           <div class="card-icon">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -950,6 +1058,7 @@
           <div><div class="card-title">Administrar Tienda</div><div class="card-sub">Panel de administración</div></div>
           <span class="card-arrow">›</span>
         </a>
+
       </div>
     </div>
   </section>
@@ -1504,6 +1613,45 @@
   <!-- Toast de compra -->
   <div class="compra-toast" id="compra-toast"></div>
 
+  <!-- BASE DE DATOS -->
+  <section class="screen seccion-screen" id="base-datos-screen">
+    <div class="seccion-container" style="max-width:800px;">
+      <div class="seccion-header">
+        <button class="sec-back" onclick="volverDashboard()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Volver
+        </button>
+        <div class="seccion-title">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          Base de Datos
+        </div>
+      </div>
+
+      <div class="bd-stat-bar" id="bd-stats" style="display:none;">
+        <div class="bd-stat">
+          <div class="bd-stat-num" id="bd-total-registros">0</div>
+          <div class="bd-stat-label">Carnets</div>
+        </div>
+        <div class="bd-stat">
+          <div class="bd-stat-num" id="bd-total-items">0</div>
+          <div class="bd-stat-label">Items en inventario</div>
+        </div>
+      </div>
+
+      <div class="search-bar-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" id="bd-search" type="text" placeholder="Buscar por nombre, apellidos o RUT...">
+      </div>
+
+      <div class="rc-loading" id="bd-loading">
+        <div class="spinner"></div>
+        <span>Cargando base de datos...</span>
+      </div>
+      <div id="bd-lista" style="display:flex; flex-direction:column; gap:10px; width:100%;"></div>
+    </div>
+  </section>
+
+
   <script>
     // ── IDs admin (debe coincidir con banco.js) ───────────────────────────────
     // ⚠️ IDs admin del BANCO — deben coincidir con banco.js
@@ -1528,7 +1676,7 @@
     let countdownInterval = null;
 
     // ── Pantallas ─────────────────────────────────────────────────────────────
-    const screens = ['landing','dashboard','registro-civil','banco-screen','admin-screen','tienda-screen','inventario-screen','admin-tienda-screen'];
+    const screens = ['landing','dashboard','registro-civil','banco-screen','admin-screen','tienda-screen','inventario-screen','admin-tienda-screen','base-datos-screen'];
 
     function mostrarPantalla(id) {
       screens.forEach(s => {
@@ -2126,18 +2274,27 @@
     let todosLosProductos = [];
     let categoriaActual = 'todos';
 
+    let misProductosIds = new Set(); // IDs de productos que ya tengo
+
     async function cargarTienda() {
       if (!currentUser?.id) return;
       document.getElementById('tienda-loading').style.display = 'flex';
       document.getElementById('tienda-productos-wrap').style.display = 'none';
 
       try {
-        const res  = await fetch('/api/tienda?action=productos');
-        const data = await res.json();
-        todosLosProductos = data.productos || [];
+        // Cargar productos e inventario en paralelo
+        const [resP, resI] = await Promise.all([
+          fetch('/api/tienda?action=productos'),
+          fetch(`/api/tienda?action=inventario&discord_id=${currentUser.id}`),
+        ]);
+        const dataP = await resP.json();
+        const dataI = await resI.json();
+
+        todosLosProductos = dataP.productos || [];
+        misProductosIds   = new Set((dataI.items || []).map(i => i.producto_id));
+
         document.getElementById('tienda-loading').style.display = 'none';
         document.getElementById('tienda-productos-wrap').style.display = 'block';
-        // Reset búsqueda al recargar
         const sq = document.getElementById('tienda-search');
         if (sq) sq.value = '';
         categoriaActual = 'todos';
@@ -2187,7 +2344,9 @@
         grid.innerHTML = '<div class="tienda-empty">No hay productos disponibles en esta categoría.</div>';
         return;
       }
-      grid.innerHTML = lista.map(p => `
+      grid.innerHTML = lista.map(p => {
+        const yaComprado = misProductosIds.has(p.id);
+        return `
         <div class="producto-card">
           <div class="producto-img">
             ${p.imagen_url
@@ -2198,12 +2357,13 @@
             <div class="producto-nombre">${escHtml(p.nombre)}</div>
             <span class="producto-cat cat-${p.categoria}">${catLabel(p.categoria)}</span>
             <div class="producto-precio">${formatearSaldo(p.precio)}</div>
-            <button class="btn-comprar" onclick="comprarProducto(${p.id}, this)">
-              Comprar
+            <button class="btn-comprar${yaComprado ? ' btn-ya-tienes' : ''}"
+              ${yaComprado ? 'disabled title="Ya tienes este producto"' : `onclick="comprarProducto(${p.id}, this)"`}>
+              ${yaComprado ? 'Ya tienes' : 'Comprar'}
             </button>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     }
 
     async function comprarProducto(productoId, btn) {
@@ -2602,6 +2762,131 @@
       } catch(e) {
         mostrarToast('Error de conexión.', true);
       }
+    }
+
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // BASE DE DATOS (admin)
+    // ══════════════════════════════════════════════════════════════════════════
+    let bdRegistros    = [];
+    let bdSearchTimer  = null;
+
+    // Listener de búsqueda con debounce
+    (function() {
+      const inp = document.getElementById('bd-search');
+      if (inp) inp.addEventListener('input', () => {
+        clearTimeout(bdSearchTimer);
+        bdSearchTimer = setTimeout(() => cargarBaseDatos(inp.value), 300);
+      });
+    })();
+
+    async function cargarBaseDatos(q = '') {
+      if (!currentUser?.id) return;
+      document.getElementById('bd-loading').style.display = 'flex';
+      document.getElementById('bd-lista').innerHTML = '';
+      document.getElementById('bd-stats').style.display = 'none';
+
+      try {
+        const url = `/api/tienda?action=base_datos${q ? '&q=' + encodeURIComponent(q) : ''}`;
+        const res  = await fetch(url);
+        const data = await res.json();
+        document.getElementById('bd-loading').style.display = 'none';
+
+        bdRegistros = data.registros || [];
+        renderBaseDatos(bdRegistros);
+      } catch(e) {
+        document.getElementById('bd-loading').style.display = 'none';
+        document.getElementById('bd-lista').innerHTML = '<div class="historial-vacio">Error al cargar la base de datos.</div>';
+      }
+    }
+
+    function renderBaseDatos(lista) {
+      const el     = document.getElementById('bd-lista');
+      const statsEl = document.getElementById('bd-stats');
+
+      if (!lista.length) {
+        el.innerHTML = '<div class="historial-vacio">No se encontraron registros.</div>';
+        statsEl.style.display = 'none';
+        return;
+      }
+
+      // Stats
+      const totalItems = lista.reduce((s, r) => s + r.inventario.length, 0);
+      document.getElementById('bd-total-registros').textContent = lista.length;
+      document.getElementById('bd-total-items').textContent     = totalItems;
+      statsEl.style.display = 'flex';
+
+      el.innerHTML = lista.map(r => {
+        const nombreCompleto = [r.nombre1, r.nombre2, r.apellido1, r.apellido2].filter(Boolean).join(' ');
+        const apellidos      = [r.apellido1, r.apellido2].filter(Boolean).join(' ');
+        const nombres        = [r.nombre1, r.nombre2].filter(Boolean).join(' ');
+        const fnac           = r.fecha_nac ? (() => { const p = r.fecha_nac.split('-'); return p.length===3 ? `${p[2]}/${p[1]}/${p[0]}` : r.fecha_nac; })() : '—';
+        const invCount       = r.inventario.length;
+
+        // inventario items HTML
+        const invHtml = invCount === 0
+          ? '<div class="bd-inv-empty">Sin items en inventario</div>'
+          : r.inventario.map(item => `
+              <div class="bd-inv-item">
+                <div class="bd-inv-item-img">
+                  ${item.imagen_url
+                    ? `<img src="${escHtml(item.imagen_url)}" alt="${escHtml(item.nombre)}" onerror="this.parentElement.innerHTML='${catEmoji(item.categoria)}';">`
+                    : catEmoji(item.categoria)}
+                </div>
+                <div class="bd-inv-item-nombre">${escHtml(item.nombre)}</div>
+                <div class="bd-inv-item-precio">${formatearSaldo(item.precio_pagado)}</div>
+              </div>`).join('');
+
+        return `
+          <div class="bd-carnet-row" id="bdr-${r.discord_id}">
+            <div class="bd-carnet-header" onclick="toggleBdRow('${r.discord_id}')">
+              <div class="bd-avatar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              </div>
+              <div class="bd-info">
+                <div class="bd-nombre">${escHtml(nombreCompleto)}</div>
+                <div class="bd-rut">${escHtml(r.rut || '—')}</div>
+              </div>
+              <div class="bd-meta">
+                <div class="bd-fecha">${fnac}</div>
+                <div class="bd-items">${invCount} item${invCount !== 1 ? 's' : ''}</div>
+              </div>
+              <svg class="bd-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="bd-detail">
+              <div class="bd-carnet-mini">
+                <div class="bd-mini-foto">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#003087" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                </div>
+                <div class="bd-mini-datos">
+                  <div class="bd-mini-campo">
+                    <div class="bd-mini-label">Apellidos</div>
+                    <div class="bd-mini-valor">${escHtml(apellidos)}</div>
+                  </div>
+                  <div class="bd-mini-campo">
+                    <div class="bd-mini-label">Nombres</div>
+                    <div class="bd-mini-valor">${escHtml(nombres)}</div>
+                  </div>
+                  <div class="bd-mini-campo">
+                    <div class="bd-mini-label">Fecha de Nacimiento</div>
+                    <div class="bd-mini-valor">${fnac}</div>
+                  </div>
+                  <div class="bd-mini-campo">
+                    <div class="bd-mini-label">R.U.N.</div>
+                    <div class="bd-mini-valor bd-mini-rut">${escHtml(r.rut || '—')}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="bd-inv-titulo">Inventario</div>
+              <div class="bd-inv-lista">${invHtml}</div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function toggleBdRow(discordId) {
+      const row = document.getElementById(`bdr-${discordId}`);
+      if (row) row.classList.toggle('open');
     }
 
   </script>
