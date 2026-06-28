@@ -1161,18 +1161,27 @@
       position: relative; width: 260px; height: 260px;
       display: flex; align-items: center; justify-content: center;
     }
-    .ruleta-canvas-wrap {
-      position: relative; width: 260px; height: 260px;
-    }
-    .ruleta-canvas { border-radius: 50%; display: block; }
-    .ruleta-aguja {
-      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-      width: 0; height: 0;
-      border-left: 10px solid transparent; border-right: 10px solid transparent;
-      border-top: 22px solid #F59E0B;
-      filter: drop-shadow(0 2px 6px rgba(245,158,11,0.8));
-      z-index: 5;
-    }
+   .ruleta-outer {
+  padding-top: 20px;      /* espacio para que la aguja no se corte */
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.ruleta-canvas-wrap {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  overflow: visible;      /* ← este era el bug principal */
+}
+.ruleta-aguja {
+  position: absolute;
+  top: -18px; left: 50%; transform: translateX(-50%);
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+  border-top: 26px solid #F59E0B;
+  filter: drop-shadow(0 2px 6px rgba(245,158,11,0.9));
+  z-index: 5;
+}
     .ruleta-centro {
       position: absolute; width: 54px; height: 54px; border-radius: 50%;
       background: radial-gradient(circle, #1a1a1a 60%, #333 100%);
@@ -2188,12 +2197,13 @@
 
       <!-- ── RULETA ────────────────────────────────── -->
       <div class="casino-juego visible" id="casino-panel-ruleta">
-        <div class="ruleta-canvas-wrap" id="ruleta-canvas-wrap">
-          <canvas class="ruleta-canvas" id="ruleta-canvas" width="260" height="260"></canvas>
-          <div class="ruleta-aguja"></div>
-          <div class="ruleta-centro">🎰</div>
-        </div>
-
+        <div class="ruleta-outer">
+  <div class="ruleta-canvas-wrap" id="ruleta-canvas-wrap">
+    <canvas ...></canvas>
+    <div class="ruleta-aguja"></div>
+    <div class="ruleta-centro">🎰</div>
+  </div>
+</div>
         <div class="casino-mult-info">
           <div class="cmi-item"><span class="cmi-badge rojo">🔴 x2</span> Rojo</div>
           <div class="cmi-item"><span class="cmi-badge negro">⚫ x2</span> Negro</div>
