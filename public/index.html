@@ -70,16 +70,24 @@
     .logo-corner img { width: 100%; height: 100%; object-fit: cover; }
 
     /* LANDING */
-    #landing { flex-direction: column; justify-content: flex-start; align-items: center; padding: 0 0 120px; gap: 48px; }
+    #landing {
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 48px;
+      padding-bottom: 0;
+    }
 
     .landing-footer {
-      position: relative;
+      position: sticky;
+      bottom: 0;
       width: 100%;
       padding: 14px 28px;
       display: flex; align-items: center; justify-content: space-between;
       gap: 12px;
       border-top: 1px solid rgba(255,255,255,0.06);
-      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(12px);
       animation: fadeUp 0.9s 0.6s var(--ease) both;
       flex-wrap: wrap;
     }
