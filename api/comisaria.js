@@ -415,9 +415,10 @@ export default async function handler(req, res) {
       const rows = await sql`
         SELECT d.discord_id, d.nombre1 || ' ' || d.apellido1 AS nombre_completo,
                d.rut AS dni
-        FROM dnis d
+        FROM dni d
         WHERE d.discord_id ILIKE ${"%" + q + "%"}
            OR (d.nombre1 || ' ' || d.apellido1) ILIKE ${"%" + q + "%"}
+           OR (d.nombre1 || ' ' || d.nombre2 || ' ' || d.apellido1 || ' ' || d.apellido2) ILIKE ${"%" + q + "%"}
            OR d.rut ILIKE ${"%" + q + "%"}
         LIMIT 10
       `;
