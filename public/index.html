@@ -3474,9 +3474,6 @@
     // ── Super Admin ID (solo para resaltar visualmente su fila en el Panel
     // Admin; la autorización real ya se valida en el servidor con la sesión) ──
     const SUPER_ADMIN_ID = "1192236737565577287";
-    // IDs admin dinámicos (cargados desde la BD al hacer login)
-    let ADMIN_IDS = [SUPER_ADMIN_ID];
-    let ADMIN_IDS_TIENDA = [SUPER_ADMIN_ID];
 
     // ── Estado global ─────────────────────────────────────────────────────────
     let currentUser = null;
@@ -3505,20 +3502,24 @@
       document.getElementById('discord-avatar').src       = user.avatar;
       document.getElementById('welcome-msg').textContent  = `Hola, ${user.name}`;
 
-      // Cargar lista dinámica de admins desde la BD
+      // Verificar mi propio estado de admin contra la BD (action=verificar es
+      // accesible para cualquier sesión válida). Antes se usaba action=listar,
+      // que el backend reserva solo al super admin y devuelve 403 para el
+      // resto — por eso a los admins agregados nunca les aparecían sus
+      // paneles, y por eso a ti tampoco te aparecía el de Casino (que depende
+      // de user.esAdmin, valor que nunca llegaba a asignarse).
       try {
-        const r = await fetch(`/api/admin?action=listar&discord_id=${user.id}`);
+        const r = await fetch('/api/admin?action=verificar');
         if (r.ok) {
           const data = await r.json();
-          const ids = data.admins.map(a => a.discord_id);
-          ADMIN_IDS = ids;
-          ADMIN_IDS_TIENDA = ids;
+          user.esAdmin = data.esAdmin;
+          user.esSuperAdmin = data.esSuperAdmin;
         }
       } catch {}
 
       // Mostrar card admin banco si corresponde
       const adminCard = document.getElementById('admin-card');
-      if (ADMIN_IDS.includes(user.id)) {
+      if (user.esAdmin) {
         adminCard.style.display = 'flex';
         adminCard.onclick = () => { abrirSeccion('admin-screen'); cargarAdminUsuarios(); };
       } else {
@@ -3527,7 +3528,7 @@
 
       // Mostrar card admin tienda si corresponde
       const adminTiendaCard = document.getElementById('admin-tienda-card');
-      if (ADMIN_IDS_TIENDA.includes(user.id)) {
+      if (user.esAdmin) {
         adminTiendaCard.style.display = 'flex';
         adminTiendaCard.onclick = () => { abrirSeccion('admin-tienda-screen'); cargarAdminProductos(); };
       } else {
