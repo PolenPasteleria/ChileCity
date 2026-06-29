@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { requireSession } from "../lib/auth.js";
-import { BASE_URL } from "../lib/constants.js";
+import { BASE_URL, CASINO_MIN_APUESTA, CASINO_MAX_APUESTA, RATE_CASINO_SEG } from "../lib/constants.js";
+import { checkRateLimit } from "../lib/rateLimit.js";
 
 function toNumber(v) {
   const n = Number(v);
@@ -107,10 +108,18 @@ export default async function handler(req, res) {
     if (req.method === "POST" && action === "jugar") {
       const { juego, monto, eleccion } = req.body;
 
+      // Rate limiting
+      const rl = await checkRateLimit(sql, discord_id, "casino", RATE_CASINO_SEG);
+      if (rl) return res.status(429).json({ error: rl });
+
       // Validación básica
       if (!juego || !eleccion) return res.status(400).json({ error: "Faltan campos." });
       const montoNum = parseMonto(monto);
       if (!montoNum) return res.status(400).json({ error: "Monto inválido. Debe ser entero positivo." });
+      if (montoNum < CASINO_MIN_APUESTA)
+        return res.status(400).json({ error: `La apuesta mínima es $${CASINO_MIN_APUESTA.toLocaleString("es-CL")}.` });
+      if (montoNum > CASINO_MAX_APUESTA)
+        return res.status(400).json({ error: `La apuesta máxima es $${CASINO_MAX_APUESTA.toLocaleString("es-CL")}.` });
 
       // Validar juego y elección
       if (juego === "ruleta" && !["rojo","negro","verde"].includes(eleccion))

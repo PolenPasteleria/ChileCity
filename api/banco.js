@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { requireSession } from "../lib/auth.js";
-import { SUPER_ADMIN_ID, BASE_URL } from "../lib/constants.js";
+import { SUPER_ADMIN_ID, BASE_URL, RATE_TRANSFER_SEG } from "../lib/constants.js";
+import { checkRateLimit } from "../lib/rateLimit.js";
 
 const SALDO_INICIAL = 1000000;
 
@@ -207,6 +208,10 @@ export default async function handler(req, res) {
       const { rut_destino, monto } = req.body;
       if (!rut_destino || !monto)
         return res.status(400).json({ error: "Faltan campos" });
+
+      // Rate limiting
+      const rl = await checkRateLimit(sql, discord_id, "transfer", RATE_TRANSFER_SEG);
+      if (rl) return res.status(429).json({ error: rl });
 
       const montoNum = parseMonto(monto);
       if (montoNum === null || montoNum <= 0)

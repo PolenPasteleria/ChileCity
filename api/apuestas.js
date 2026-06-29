@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { requireSession, getSessionUser } from "../lib/auth.js";
-import { BASE_URL } from "../lib/constants.js";
+import { BASE_URL, RATE_APUESTA_SEG } from "../lib/constants.js";
+import { checkRateLimit } from "../lib/rateLimit.js";
 
 function toNumber(v) {
   const n = Number(v);
@@ -374,6 +375,10 @@ export default async function handler(req, res) {
     // ── POST: apostar (usuario) ─────────────────────────────────────────────
     if (req.method === "POST" && action === "apostar") {
       const { partido_id, tipo, eleccion, monto, marcador_a, marcador_b } = req.body;
+
+      // Rate limiting
+      const rl = await checkRateLimit(sql, discord_id, "apuesta", RATE_APUESTA_SEG);
+      if (rl) return res.status(429).json({ error: rl });
 
       if (!partido_id || !tipo || !eleccion) return res.status(400).json({ error: "Faltan campos" });
       const montoNum = parseMonto(monto);
