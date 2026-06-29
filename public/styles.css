@@ -2391,20 +2391,19 @@
        Solución: el scroll vive en el contenedor interno, no en la pantalla.
     ── */
     .pp-screen {
-      overflow: hidden !important;
-      align-items: flex-start !important;
-      justify-content: center !important;
-    }
-    .pp-container {
-      height: 100%;
       overflow-y: auto !important;
       overflow-x: hidden !important;
       -webkit-overflow-scrolling: touch !important;
       overscroll-behavior: contain;
+      align-items: flex-start !important;
+      justify-content: center !important;
+    }
+    .pp-container {
       width: 100%;
       max-width: 860px;
       margin: 0 auto;
       padding-top: 0;
+      height: auto;
     }
 
     /* Stat bar simplificada — solo ciudadanos */
