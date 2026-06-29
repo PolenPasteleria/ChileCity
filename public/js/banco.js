@@ -125,8 +125,8 @@
 
     // Transferencia
     function mostrarTransferir() {
+      ocultarSecciones();
       document.getElementById('transfer-form').style.display = 'flex';
-      document.getElementById('historial-wrap').style.display = 'none';
     }
     function ocultarTransferir() {
       document.getElementById('transfer-form').style.display = 'none';
@@ -176,7 +176,7 @@
     async function mostrarHistorial() {
       const wrap = document.getElementById('historial-wrap');
       const lista = document.getElementById('historial-lista');
-      document.getElementById('transfer-form').style.display = 'none';
+      ocultarSecciones();
       wrap.style.display = 'block';
       lista.innerHTML = '<div class="historial-vacio">Cargando...</div>';
 
@@ -418,3 +418,107 @@
     });
 
     // ══════════════════════════════════════════════════════════════════════════
+
+    // ── Contactos ─────────────────────────────────────────────────────────────
+    function ocultarSecciones() {
+      document.getElementById('transfer-form').style.display = 'none';
+      document.getElementById('historial-wrap').style.display = 'none';
+      document.getElementById('contactos-wrap').style.display = 'none';
+    }
+
+    async function mostrarContactos() {
+      ocultarSecciones();
+      document.getElementById('contactos-wrap').style.display = 'block';
+      await cargarContactos();
+    }
+
+    async function cargarContactos() {
+      const lista = document.getElementById('contactos-lista');
+      lista.innerHTML = '<div class="historial-vacio">Cargando...</div>';
+      try {
+        const res = await fetch('/api/banco?action=contactos');
+        const data = await res.json();
+        const contactos = data.contactos || [];
+        if (!contactos.length) {
+          lista.innerHTML = '<div class="historial-vacio">No tienes contactos guardados aún</div>';
+          return;
+        }
+        lista.innerHTML = contactos.map(c => `
+          <div class="historial-item" style="cursor:default;">
+            <div class="hi-icono ingreso" style="background:rgba(139,92,246,0.15); color:#8B5CF6;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="hi-desc" style="flex:1;">
+              <div class="hi-desc-titulo">${c.nombre}</div>
+              <div class="hi-desc-fecha">${c.rut}</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button class="btn-small" style="background:rgba(16,185,129,0.12);color:#10B981;border:1px solid rgba(16,185,129,0.25);font-size:11px;padding:4px 10px;"
+                onclick="transferirAContacto('${c.rut}')">Transferir</button>
+              <button class="btn-small red" style="font-size:11px;padding:4px 10px;"
+                onclick="eliminarContacto(${c.id})">✕</button>
+            </div>
+          </div>
+        `).join('');
+      } catch(e) {
+        lista.innerHTML = '<div class="historial-vacio">Error al cargar contactos</div>';
+      }
+    }
+
+    function mostrarFormAgregarContacto() {
+      const form = document.getElementById('contactos-agregar-form');
+      form.style.display = 'flex';
+      document.getElementById('btn-mostrar-agregar-contacto').style.display = 'none';
+      document.getElementById('nuevo-contacto-nombre').value = '';
+      document.getElementById('nuevo-contacto-rut').value = '';
+      document.getElementById('contacto-error').classList.remove('visible');
+    }
+
+    function ocultarFormAgregarContacto() {
+      document.getElementById('contactos-agregar-form').style.display = 'none';
+      document.getElementById('btn-mostrar-agregar-contacto').style.display = '';
+    }
+
+    async function agregarContacto() {
+      const nombre = document.getElementById('nuevo-contacto-nombre').value.trim();
+      const rut    = document.getElementById('nuevo-contacto-rut').value.trim();
+      const errEl  = document.getElementById('contacto-error');
+      errEl.classList.remove('visible');
+
+      if (!nombre || !rut) {
+        errEl.textContent = 'Completa el nombre y el RUT.';
+        errEl.classList.add('visible'); return;
+      }
+
+      try {
+        const res = await fetch('/api/banco?action=contacto_agregar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, rut }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errEl.textContent = data.error || 'Error al guardar.';
+          errEl.classList.add('visible'); return;
+        }
+        ocultarFormAgregarContacto();
+        await cargarContactos();
+      } catch(e) {
+        errEl.textContent = 'Error de conexión.';
+        errEl.classList.add('visible');
+      }
+    }
+
+    async function eliminarContacto(id) {
+      try {
+        await fetch(`/api/banco?action=contacto_borrar&id=${id}`, { method: 'DELETE' });
+        await cargarContactos();
+      } catch(e) {}
+    }
+
+    function transferirAContacto(rut) {
+      ocultarSecciones();
+      document.getElementById('transfer-form').style.display = 'flex';
+      document.getElementById('transfer-rut').value = rut;
+      document.getElementById('transfer-monto').focus();
+    }
