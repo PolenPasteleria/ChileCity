@@ -211,11 +211,11 @@
           <div><div class="card-title">Inventario</div><div class="card-sub">Tus objetos y compras</div></div>
           <span class="card-arrow">›</span>
         </div>
-        <div class="nav-card" onclick="abrirSeccion('base-datos-screen'); cargarBaseDatos()">
+        <div class="nav-card" onclick="abrirSeccion('perfil-publico-screen'); cargarPerfilPublico()">
           <div class="card-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M18 11h4M20 9v4" stroke-width="1.8"/></svg>
           </div>
-          <div><div class="card-title">Base de Datos</div><div class="card-sub">Carnets registrados en la ciudad</div></div>
+          <div><div class="card-title">Perfil Público</div><div class="card-sub">Ciudadanos, inventarios y registros</div></div>
           <span class="card-arrow">›</span>
         </div>
         <a href="#" class="nav-card" id="admin-card" style="display:none">
@@ -1416,41 +1416,54 @@
     </div>
   </section>
 
-  <!-- BASE DE DATOS -->
-  <section class="screen seccion-screen" id="base-datos-screen">
-    <div class="seccion-container" style="max-width:800px;">
+  <!-- PERFIL PÚBLICO -->
+  <section class="screen seccion-screen" id="perfil-publico-screen">
+    <div class="seccion-container" style="max-width:860px;">
       <div class="seccion-header">
         <button class="sec-back" onclick="volverDashboard()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
           Volver
         </button>
         <div class="seccion-title">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-          Base de Datos
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M18 11h4M20 9v4" stroke-width="2.2"/></svg>
+          Perfil Público
         </div>
       </div>
 
-      <div class="bd-stat-bar" id="bd-stats" style="display:none;">
-        <div class="bd-stat">
-          <div class="bd-stat-num" id="bd-total-registros">0</div>
-          <div class="bd-stat-label">Carnets</div>
+      <!-- Stats bar -->
+      <div class="pp-stat-bar" id="pp-stats" style="display:none;">
+        <div class="pp-stat">
+          <div class="pp-stat-num" id="pp-total-registros">0</div>
+          <div class="pp-stat-label">Ciudadanos</div>
         </div>
-        <div class="bd-stat">
-          <div class="bd-stat-num" id="bd-total-items">0</div>
-          <div class="bd-stat-label">Items en inventario</div>
+        <div class="pp-stat">
+          <div class="pp-stat-num" id="pp-total-items">0</div>
+          <div class="pp-stat-label">Items</div>
+        </div>
+        <div class="pp-stat pp-stat-alert">
+          <div class="pp-stat-num" id="pp-total-multas">0</div>
+          <div class="pp-stat-label">Multas</div>
+        </div>
+        <div class="pp-stat pp-stat-danger">
+          <div class="pp-stat-num" id="pp-total-ants">0</div>
+          <div class="pp-stat-label">Antecedentes</div>
         </div>
       </div>
 
-      <div class="search-bar-wrap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input class="search-input" id="bd-search" type="text" placeholder="Buscar por nombre, apellidos o RUT...">
+      <!-- Barra de búsqueda con botón limpiar -->
+      <div class="pp-search-wrap">
+        <svg class="pp-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="pp-search-input" id="pp-search" type="search" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Buscar por nombre, apellidos o RUT…">
+        <button class="pp-clear-btn" id="pp-clear" onclick="limpiarBusquedaPP()" style="opacity:0" aria-label="Limpiar búsqueda">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
 
-      <div class="rc-loading" id="bd-loading">
+      <div class="rc-loading" id="pp-loading">
         <div class="spinner"></div>
-        <span>Cargando base de datos...</span>
+        <span>Cargando ciudadanos…</span>
       </div>
-      <div id="bd-lista" style="display:flex; flex-direction:column; gap:10px; width:100%;"></div>
+      <div id="pp-lista" style="display:flex; flex-direction:column; gap:12px; width:100%; padding-bottom:32px;"></div>
     </div>
   </section>
 
@@ -1759,7 +1772,7 @@
   <script src="/js/banco.js"></script>
   <script src="/js/tienda.js"></script>
   <script src="/js/admin-tienda.js"></script>
-  <script src="/js/base-datos.js"></script>
+  <script src="/js/perfil-publico.js"></script>
   <script src="/js/panel-admin.js"></script>
   <script src="/js/comisaria.js"></script>
   <script src="/js/casino.js"></script>
