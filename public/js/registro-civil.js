@@ -1,5 +1,35 @@
     // REGISTRO CIVIL
     // ══════════════════════════════════════════════════════════════════════════
+
+    // Validación en tiempo real
+    (function initRCValidacion() {
+      const campos = ['f-nombre1','f-nombre2','f-apellido1','f-apellido2'];
+      const soloLetras = /^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s'-]*$/;
+      campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', () => {
+          const val = el.value.trim();
+          if (val && !soloLetras.test(val)) {
+            el.classList.add('input-error');
+            el.classList.remove('input-ok');
+          } else if (val.length >= 2) {
+            el.classList.remove('input-error');
+            el.classList.add('input-ok');
+          } else {
+            el.classList.remove('input-error','input-ok');
+          }
+        });
+      });
+      const fechaEl = document.getElementById('f-fecha');
+      if (fechaEl) {
+        fechaEl.addEventListener('change', () => {
+          if (fechaEl.value) { fechaEl.classList.add('input-ok'); fechaEl.classList.remove('input-error'); }
+          else { fechaEl.classList.remove('input-ok'); }
+        });
+      }
+    })();
+
     async function cargarDNI() {
       if (!currentUser?.id) return;
       document.getElementById('rc-loading').style.display = 'flex';
