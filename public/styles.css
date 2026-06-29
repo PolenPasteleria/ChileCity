@@ -2393,7 +2393,7 @@
     .pp-screen {
       overflow: hidden !important;
       align-items: flex-start !important;
-      justify-content: flex-start !important;
+      justify-content: center !important;
     }
     .pp-container {
       height: 100%;
@@ -2402,6 +2402,8 @@
       -webkit-overflow-scrolling: touch !important;
       overscroll-behavior: contain;
       width: 100%;
+      max-width: 860px;
+      margin: 0 auto;
       padding-top: 0;
     }
 
