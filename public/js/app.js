@@ -20,7 +20,7 @@
     }
 
     // ── Pantallas ─────────────────────────────────────────────────────────────
-    const screens = ['landing','dashboard','registro-civil','banco-screen','admin-screen','tienda-screen','inventario-screen','admin-tienda-screen','perfil-publico-screen','panel-admin-screen','comisaria-screen','casino-screen','apuestas-screen','admin-casino-screen','error-403','error-404'];
+    const screens = ['landing','dashboard','registro-civil','banco-screen','admin-screen','tienda-screen','inventario-screen','admin-tienda-screen','perfil-publico-screen','panel-admin-screen','comisaria-screen','casino-screen','apuestas-screen','admin-casino-screen','empresas-screen','admin-empresas-screen','error-403','error-404'];
 
     // ── Indicador de sección activa ──────────────────────────────────────────
     let _sectionIndicatorTimer = null;
@@ -40,6 +40,8 @@
         'casino-screen': 'Casino',
         'apuestas-screen': 'Apuestas',
         'admin-casino-screen': 'Admin Casino',
+        'empresas-screen': 'Empresas',
+        'admin-empresas-screen': 'Administrar Empresas',
       };
       const label = labels[id];
       let indicator = document.getElementById('section-indicator');
@@ -145,6 +147,15 @@
         adminCasinoCard.style.display = 'flex';
       } else {
         adminCasinoCard.style.display = 'none';
+      }
+
+      // Mostrar card Administrar Empresas a todos los admins
+      const adminEmpresasCard = document.getElementById('admin-empresas-card');
+      if (user.esAdmin) {
+        adminEmpresasCard.style.display = 'flex';
+        adminEmpresasCard.onclick = () => { abrirSeccion('admin-empresas-screen'); cargarAdminEmpresas(); };
+      } else {
+        adminEmpresasCard.style.display = 'none';
       }
 
       mostrarPantalla('dashboard');
