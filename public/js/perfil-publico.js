@@ -306,7 +306,7 @@
 
       btn.classList.add('active');
       const activePanel = document.getElementById(`pptp-${cardId}-${tabName}`);
-      if (activePanel) activePanel.classList.add('active');
+      if (activePanel) { activePanel.classList.add('active'); activePanel.scrollTop = 0; }
 
       ppDespertarScroll();
     }
