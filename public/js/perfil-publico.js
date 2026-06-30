@@ -139,6 +139,8 @@
         const invCount  = r.inventario.length;
         const multCount = r.multas.length;
         const antCount  = r.antecedentes.length;
+        const logrosLista = r.logros || [];
+        const logCount  = logrosLista.filter(l => l.obtenido).length;
 
         // Badges de alerta
         const multaBadge = multCount > 0
@@ -197,6 +199,21 @@
               </div>`;
             }).join('');
 
+        // Logros HTML (reutiliza las mismas clases que la sección "Logros" personal)
+        const logrosHtml = logrosLista.length === 0
+          ? '<div class="pp-empty-slot">Sin logros</div>'
+          : `<div class="logros-grid">${logrosLista.map(l => `
+              <div class="logro-card ${l.obtenido ? 'desbloqueado' : 'bloqueado'}" style="--logro-color:${l.color}">
+                <div class="logro-icono">${l.icono}</div>
+                <div class="logro-info">
+                  <div class="logro-nombre">${escHtml(l.nombre)}</div>
+                  <div class="logro-desc">${escHtml(l.descripcion)}</div>
+                  ${l.obtenido
+                    ? `<div class="logro-fecha">Desbloqueado el ${new Date(l.fecha).toLocaleDateString('es-CL')}</div>`
+                    : `<div class="logro-fecha logro-bloqueada-txt">Bloqueado</div>`}
+                </div>
+              </div>`).join('')}</div>`;
+
         return `
           <div class="pp-card" id="ppc-${r.discord_id}">
             <div class="pp-card-header" onclick="togglePPCard('${r.discord_id}')">
@@ -205,7 +222,7 @@
               </div>
               <div class="pp-header-info">
                 <div class="pp-nombre">${escHtml(nombreCompleto)}</div>
-                <div class="pp-rut">${escHtml(r.rut || '—')}</div>
+                <div class="pp-rut">${escHtml(r.rut || '—')}${r.discord_username ? ' · @' + escHtml(r.discord_username) : ''}</div>
               </div>
               <div class="pp-header-badges">
                 ${multaBadge}${antBadge}
@@ -229,6 +246,7 @@
                   <div class="pp-mini-campo"><div class="pp-mini-label">Fecha de Nacimiento</div><div class="pp-mini-valor">${fnac}</div></div>
                   <div class="pp-mini-campo"><div class="pp-mini-label">R.U.N.</div><div class="pp-mini-valor pp-mini-rut">${escHtml(r.rut || '—')}</div></div>
                   <div class="pp-mini-campo"><div class="pp-mini-label">Nacionalidad</div><div class="pp-mini-valor">${escHtml(r.nacionalidad || 'Chilena')}</div></div>
+                  <div class="pp-mini-campo"><div class="pp-mini-label">Usuario Discord</div><div class="pp-mini-valor">${r.discord_username ? '@' + escHtml(r.discord_username) : 'Sin vincular'}</div></div>
                 </div>
               </div>
 
@@ -246,6 +264,10 @@
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                   Antecedentes <span class="pp-tab-count ${antCount>0?'pp-tab-count-alert':''}">${antCount}</span>
                 </button>
+                <button class="pp-tab" onclick="ppSwitchTab('${r.discord_id}','logros',this)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 5H4a3 3 0 0 0 3 5M17 5h3a3 3 0 0 1-3 5"/><path d="M8 21h8M12 17v4"/></svg>
+                  Logros <span class="pp-tab-count">${logCount}</span>
+                </button>
               </div>
 
               <div class="pp-tab-panel active" id="pptp-${r.discord_id}-inv">
@@ -256,6 +278,9 @@
               </div>
               <div class="pp-tab-panel" id="pptp-${r.discord_id}-ants">
                 <div class="pp-records-list">${antsHtml}</div>
+              </div>
+              <div class="pp-tab-panel" id="pptp-${r.discord_id}-logros">
+                ${logrosHtml}
               </div>
             </div>
           </div>`;
@@ -273,7 +298,7 @@
       if (!tabsContainer) return;
       tabsContainer.querySelectorAll('.pp-tab').forEach(t => t.classList.remove('active'));
 
-      ['inv','multas','ants'].forEach(name => {
+      ['inv','multas','ants','logros'].forEach(name => {
         const panel = document.getElementById(`pptp-${cardId}-${name}`);
         if (panel) panel.classList.remove('active');
       });
