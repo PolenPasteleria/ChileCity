@@ -1,3 +1,81 @@
+# Cambios aplicados — ChileCity RP v15 (auditoría de mejoras)
+
+## ⚠️ Variables de entorno requeridas
+
+Las mismas que v14 — sin cambios.
+
+---
+
+## 🔒 Seguridad — Headers HTTP
+
+- `vercel.json`: se agregó un bloque `headers` aplicado a todo el sitio:
+  - `Content-Security-Policy` — restringe scripts/estilos/fuentes/imágenes a
+    `'self'` (más Google Fonts, que ya se usaba) y bloquea que el sitio sea
+    embebido en un `<iframe>` ajeno (`frame-ancestors 'none'`).
+  - `X-Content-Type-Options: nosniff` — evita que el navegador "adivine" el
+    tipo de un archivo servido (mitiga ataques de MIME-sniffing).
+  - `X-Frame-Options: DENY` — refuerzo del `frame-ancestors` para navegadores
+    viejos que no leen CSP.
+  - `Referrer-Policy: strict-origin-when-cross-origin` — no filtra la URL
+    completa al navegar a sitios externos.
+  - `Permissions-Policy` — deshabilita cámara/micrófono/geolocalización, que
+    el sitio no usa.
+- La CSP usa `'unsafe-inline'` en `script-src`/`style-src` porque el HTML
+  actual tiene `onclick=` inline y `style=""` en varios lugares — si en algún
+  momento se migran esos handlers a `addEventListener` y los estilos inline a
+  clases CSS, se puede sacar `'unsafe-inline'` y la política queda mucho más
+  estricta.
+
+## ⚡ Rendimiento — Caché de estáticos
+
+- `vercel.json`: se agregaron `Cache-Control` para los assets que no cambian
+  seguido:
+  - `/js/*` y `/styles.css` → `max-age=3600, must-revalidate` (una hora,
+    revalida después). Si más adelante versionas los nombres de archivo
+    (hash en el nombre), se puede subir a `immutable` con `max-age` largo.
+  - Íconos PWA, logo y favicon → `max-age=2592000, immutable` (30 días, no
+    cambian salvo que tú los reemplaces a mano).
+
+## 🧹 Limpieza — `vercel.json`
+
+- Se eliminaron 9 entradas de `rewrites` que eran no-operativas (`source`
+  igual a `destination`, ej. `/api/dni` → `/api/dni`): Vercel ya enruta
+  automáticamente cualquier archivo dentro de `/api` a su mismo path, así
+  que esas líneas no hacían nada. Se mantuvieron solo los rewrites que sí
+  cambian el path (`/auth/login`, `/api/logout`, assets en `/public`, etc).
+- **No se tocó la cantidad de funciones en `/api`** (siguen siendo 12:
+  admin, apuestas, banco, callback, casino, comisaria, dni, login,
+  notificaciones, perfil-publico, session, tienda) — el plan gratuito de
+  Vercel quedó respetado.
+
+## 🗜️ Rendimiento — CSS minificado
+
+- `public/styles.css`: pasado por `clean-css` (nivel `O2`, conserva
+  estructura pero quita comentarios, espacios y declaraciones redundantes).
+  129 KB → 92.6 KB (~28% más liviano). El contenido visual es idéntico, solo
+  cambió el formato del archivo.
+
+## ⏸️ Lo que NO se hizo en esta pasada (y por qué)
+
+- **Autoalojar la imagen de fondo (actualmente en Imgur)**: no se pudo
+  descargar desde este entorno porque no tengo acceso de red a `imgur.com`
+  (solo a un set acotado de dominios técnicos: npm, PyPI, GitHub, etc).
+  Si quieres, descarga tú la imagen y súbela a `public/`, o pásamela como
+  archivo adjunto y yo la optimizo (WebP + tamaños) y actualizo las
+  referencias en `index.html`.
+- **Dividir `index.html` (140 KB) en fragmentos cargados on-demand**: es un
+  cambio estructural grande (cómo se cargan las secciones del dashboard) con
+  riesgo real de romper algo que no puedo probar en un navegador real desde
+  acá. Si quieres avanzar en esto, mejor hacerlo de forma incremental,
+  sección por sección, probando en tu entorno de Vercel preview antes de
+  pasar a producción.
+
+### Archivos tocados
+- `vercel.json` — headers de seguridad, caché de estáticos, limpieza de rewrites redundantes.
+- `public/styles.css` — minificado.
+
+---
+
 # Cambios aplicados — ChileCity RP v14
 
 ## ⚠️ Variables de entorno requeridas

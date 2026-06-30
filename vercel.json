@@ -2,15 +2,6 @@
   "rewrites": [
     { "source": "/auth/login",    "destination": "/api/login" },
     { "source": "/auth/callback", "destination": "/api/callback" },
-    { "source": "/api/dni",       "destination": "/api/dni" },
-    { "source": "/api/banco",     "destination": "/api/banco" },
-    { "source": "/api/tienda",    "destination": "/api/tienda" },
-    { "source": "/api/admin",      "destination": "/api/admin" },
-    { "source": "/api/comisaria",  "destination": "/api/comisaria" },
-    { "source": "/api/casino",     "destination": "/api/casino" },
-    { "source": "/api/apuestas",       "destination": "/api/apuestas" },
-    { "source": "/api/perfil-publico", "destination": "/api/perfil-publico" },
-    { "source": "/api/notificaciones", "destination": "/api/notificaciones" },
     { "source": "/api/logout",         "destination": "/api/session?ruta=logout" },
     { "source": "/api/me",             "destination": "/api/session?ruta=me" },
     { "source": "/manifest.json",  "destination": "/public/manifest.json" },
@@ -22,5 +13,38 @@
     { "source": "/icon-maskable-512.png", "destination": "/public/icon-maskable-512.png" },
     { "source": "/js/:file",       "destination": "/public/js/:file" },
     { "source": "/",              "destination": "/public/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        }
+      ]
+    },
+    {
+      "source": "/js/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/styles.css",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/(icon-192.png|icon-512.png|icon-maskable-512.png|logo.webp|favicon.svg)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=2592000, immutable" }
+      ]
+    }
   ]
 }
