@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { requireSession } from "../lib/auth.js";
 import { SUPER_ADMIN_ID, BASE_URL } from "../lib/constants.js";
+import { ensureLogrosSchema, otorgarLogro } from "../lib/logros.js";
 
 async function getAdminIds(sql) {
   try {
@@ -67,6 +68,7 @@ export default async function handler(req, res) {
   try {
     const sql = neon(process.env.DATABASE_URL);
     await initTables(sql);
+    await ensureLogrosSchema(sql);
 
     const { action } = req.query;
 
@@ -214,6 +216,11 @@ export default async function handler(req, res) {
         VALUES (${discord_id}, ${producto.id}, ${producto.nombre}, ${precio}, ${producto.categoria}, ${producto.imagen_url})
         RETURNING *
       `;
+
+      // Logro: Tu Primer Auto (cualquier producto de la categoría "vehiculos")
+      if (producto.categoria === "vehiculos") {
+        await otorgarLogro(sql, discord_id, "primer_auto");
+      }
 
       return res.status(200).json({
         ok: true,

@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { requireSession } from "../lib/auth.js";
 import { BASE_URL } from "../lib/constants.js";
+import { ensureLogrosSchema, otorgarLogro } from "../lib/logros.js";
 
 // Genera un RUT chileno válido con formato XX.XXX.XXX-D
 function generarRut() {
@@ -60,6 +61,7 @@ export default async function handler(req, res) {
   try {
     const sql = neon(process.env.DATABASE_URL);
     await initTable(sql);
+    await ensureLogrosSchema(sql);
 
     // El discord_id ya NO se toma del query/body: se lee de la cookie de
     // sesión firmada, así nadie puede consultar o crear un DNI a nombre de
@@ -111,6 +113,9 @@ export default async function handler(req, res) {
         VALUES (${discord_id}, ${rut}, ${n1}, ${n2}, ${a1}, ${a2}, ${fecha_nac})
         RETURNING *
       `;
+
+      // Logro: Bienvenido a la Ciudad (primera vez que crea su DNI)
+      await otorgarLogro(sql, discord_id, "bienvenido");
 
       return res.status(201).json({ existe: true, dni: rows[0] });
     }

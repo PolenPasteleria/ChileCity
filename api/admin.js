@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { requireSession } from "../lib/auth.js";
 import { SUPER_ADMIN_ID, BASE_URL } from "../lib/constants.js";
+import { ensureLogrosSchema, otorgarLogro, quitarLogro, listarLogrosUsuario } from "../lib/logros.js";
 
 const MAX_ADMINS = 4; // máximo de admins adicionales (sin contar al super admin)
 
@@ -43,6 +44,7 @@ async function initTable(sql) {
   `;
   await sql`ALTER TABLE empresas ADD COLUMN IF NOT EXISTS dueno_nombre TEXT`;
   await sql`ALTER TABLE empresas ADD COLUMN IF NOT EXISTS dueno_avatar_url TEXT`;
+  await sql`ALTER TABLE empresas ADD COLUMN IF NOT EXISTS dueno_discord_id TEXT`;
 
   schemaReady = true;
 }
@@ -57,6 +59,7 @@ export default async function handler(req, res) {
   try {
     const sql = neon(process.env.DATABASE_URL);
     await initTable(sql);
+    await ensureLogrosSchema(sql);
 
     const { action } = req.query;
 
@@ -186,7 +189,7 @@ export default async function handler(req, res) {
 
       // ── POST: crear empresa ──────────────────────────────────────────────
       if (req.method === "POST" && action === "empresas_admin_crear") {
-        const { nombre, descripcion, logo_url, discord_url, dueno_nombre, dueno_avatar_url } = req.body || {};
+        const { nombre, descripcion, logo_url, discord_url, dueno_nombre, dueno_avatar_url, dueno_discord_id } = req.body || {};
         if (!nombre || !nombre.trim())
           return res.status(400).json({ error: "El nombre es obligatorio" });
         if (!discord_url || !discord_url.trim())
@@ -195,29 +198,36 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: "El link de Discord debe ser una URL válida (https://...)" });
         if (!dueno_nombre || !dueno_nombre.trim())
           return res.status(400).json({ error: "El nombre de Discord del dueño es obligatorio" });
+        if (!dueno_discord_id || !/^\d{15,25}$/.test(dueno_discord_id.trim()))
+          return res.status(400).json({ error: "El Discord ID del dueño es obligatorio y debe ser numérico" });
 
         const countRows = await sql`SELECT COUNT(*)::int AS total FROM empresas`;
         if ((countRows[0]?.total || 0) >= 100)
           return res.status(400).json({ error: "Se alcanzó el límite máximo de empresas" });
 
         const rows = await sql`
-          INSERT INTO empresas (nombre, descripcion, logo_url, discord_url, dueno_nombre, dueno_avatar_url)
+          INSERT INTO empresas (nombre, descripcion, logo_url, discord_url, dueno_nombre, dueno_avatar_url, dueno_discord_id)
           VALUES (
             ${nombre.trim()},
             ${descripcion?.trim() || null},
             ${logo_url?.trim() || null},
             ${discord_url.trim()},
             ${dueno_nombre.trim()},
-            ${dueno_avatar_url?.trim() || null}
+            ${dueno_avatar_url?.trim() || null},
+            ${dueno_discord_id.trim()}
           )
           RETURNING *
         `;
+
+        // Logro: Empresario (al asignarle una empresa a su Discord ID)
+        await otorgarLogro(sql, dueno_discord_id.trim(), "empresario", discord_id);
+
         return res.status(201).json({ empresa: rows[0] });
       }
 
       // ── PUT: editar empresa ──────────────────────────────────────────────
       if (req.method === "PUT" && action === "empresas_admin_editar") {
-        const { empresa_id, nombre, descripcion, logo_url, discord_url, dueno_nombre, dueno_avatar_url } = req.body || {};
+        const { empresa_id, nombre, descripcion, logo_url, discord_url, dueno_nombre, dueno_avatar_url, dueno_discord_id } = req.body || {};
         if (!empresa_id) return res.status(400).json({ error: "Falta empresa_id" });
 
         const existe = await sql`SELECT id FROM empresas WHERE id = ${empresa_id}`;
@@ -227,6 +237,9 @@ export default async function handler(req, res) {
         if (discord_url && !/^https?:\/\//i.test(discord_url.trim()))
           return res.status(400).json({ error: "El link de Discord debe ser una URL válida (https://...)" });
 
+        if (dueno_discord_id && !/^\d{15,25}$/.test(dueno_discord_id.trim()))
+          return res.status(400).json({ error: "El Discord ID del dueño debe ser numérico" });
+
         const rows = await sql`
           UPDATE empresas
           SET
@@ -235,10 +248,17 @@ export default async function handler(req, res) {
             logo_url         = COALESCE(${logo_url?.trim() || null}, logo_url),
             discord_url      = COALESCE(${discord_url?.trim() || null}, discord_url),
             dueno_nombre     = COALESCE(${dueno_nombre?.trim() || null}, dueno_nombre),
-            dueno_avatar_url = COALESCE(${dueno_avatar_url?.trim() || null}, dueno_avatar_url)
+            dueno_avatar_url = COALESCE(${dueno_avatar_url?.trim() || null}, dueno_avatar_url),
+            dueno_discord_id = COALESCE(${dueno_discord_id?.trim() || null}, dueno_discord_id)
           WHERE id = ${empresa_id}
           RETURNING *
         `;
+
+        // Logro: Empresario (también al editar, por si se agrega el ID después)
+        if (rows[0]?.dueno_discord_id) {
+          await otorgarLogro(sql, rows[0].dueno_discord_id, "empresario", discord_id);
+        }
+
         return res.status(200).json({ empresa: rows[0] });
       }
 
@@ -248,6 +268,46 @@ export default async function handler(req, res) {
         if (!empresa_id) return res.status(400).json({ error: "Falta empresa_id" });
 
         await sql`DELETE FROM empresas WHERE id = ${empresa_id}`;
+        return res.status(200).json({ ok: true });
+      }
+    }
+
+    // ══ LOGROS (gestión desde el Panel Admin) ══════════════════════════════
+    // Igual que con empresas: viven acá para no sumar otra Serverless
+    // Function. Solo accesibles para admins (cualquiera, no solo el super
+    // admin), igual que Admin Tienda y Administrar Empresas.
+    if (action && action.startsWith("logros_admin_")) {
+      const adminRows = await sql`SELECT id FROM admins WHERE discord_id = ${discord_id}`;
+      const esAdmin = adminRows.length > 0;
+      if (!esAdmin) return res.status(403).json({ error: "No autorizado" });
+
+      // ── GET: ver los logros de un usuario (por su Discord ID) ────────────
+      if (req.method === "GET" && action === "logros_admin_usuario") {
+        const { target_id } = req.query;
+        if (!target_id || !target_id.trim())
+          return res.status(400).json({ error: "Falta target_id" });
+
+        const logros = await listarLogrosUsuario(sql, target_id.trim());
+        return res.status(200).json({ target_id: target_id.trim(), logros });
+      }
+
+      // ── POST: otorgar un logro manualmente ────────────────────────────────
+      if (req.method === "POST" && action === "logros_admin_otorgar") {
+        const { target_id, codigo } = req.body || {};
+        if (!target_id || !codigo)
+          return res.status(400).json({ error: "Faltan campos" });
+
+        const otorgado = await otorgarLogro(sql, target_id.trim(), codigo, discord_id);
+        return res.status(200).json({ ok: true, otorgado });
+      }
+
+      // ── DELETE: quitar un logro ───────────────────────────────────────────
+      if (req.method === "DELETE" && action === "logros_admin_quitar") {
+        const { target_id, codigo } = req.query;
+        if (!target_id || !codigo)
+          return res.status(400).json({ error: "Faltan campos" });
+
+        await quitarLogro(sql, target_id.trim(), codigo);
         return res.status(200).json({ ok: true });
       }
     }

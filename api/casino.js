@@ -2,6 +2,7 @@ import { neon } from "@neondatabase/serverless";
 import { requireSession } from "../lib/auth.js";
 import { BASE_URL, CASINO_MIN_APUESTA, CASINO_MAX_APUESTA, RATE_CASINO_SEG } from "../lib/constants.js";
 import { checkRateLimit } from "../lib/rateLimit.js";
+import { ensureLogrosSchema, otorgarLogro, checkLogrosSaldo } from "../lib/logros.js";
 
 function toNumber(v) {
   const n = Number(v);
@@ -68,6 +69,7 @@ export default async function handler(req, res) {
   try {
     const sql = neon(process.env.DATABASE_URL);
     await initTables(sql);
+    await ensureLogrosSchema(sql);
 
     const session = requireSession(req, res);
     if (!session) return;
@@ -210,6 +212,13 @@ export default async function handler(req, res) {
         INSERT INTO casino_apuestas (discord_id, juego, monto, eleccion, resultado, gano, premio, saldo_after)
         VALUES (${discord_id}, ${juego}, ${montoNum}, ${eleccion}, ${resultado}, ${gano}, ${premio}, ${nuevoSaldo})
       `;
+
+      // Logro: Suertudo (primera vez que gana en el casino)
+      if (gano && premio > montoNum) {
+        await otorgarLogro(sql, discord_id, "suertudo");
+      }
+      // Logros de saldo (3M/20M/50M/100M/1000M)
+      await checkLogrosSaldo(sql, discord_id, nuevoSaldo);
 
       // Actualizar ranking si ganó
       if (gano && premio > montoNum) {

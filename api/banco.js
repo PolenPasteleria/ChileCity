@@ -2,6 +2,7 @@ import { neon } from "@neondatabase/serverless";
 import { requireSession } from "../lib/auth.js";
 import { SUPER_ADMIN_ID, BASE_URL, RATE_TRANSFER_SEG } from "../lib/constants.js";
 import { checkRateLimit } from "../lib/rateLimit.js";
+import { ensureLogrosSchema, otorgarLogro, checkLogrosSaldo, listarLogrosUsuario } from "../lib/logros.js";
 
 const SALDO_INICIAL = 1000000;
 
@@ -105,6 +106,7 @@ export default async function handler(req, res) {
   try {
     const sql = neon(process.env.DATABASE_URL);
     await initTables(sql);
+    await ensureLogrosSchema(sql);
 
     const ADMIN_IDS = await getAdminIds(sql);
     const { action } = req.query;
@@ -152,8 +154,13 @@ export default async function handler(req, res) {
             INSERT INTO transacciones (discord_id, tipo, monto, descripcion, saldo_after)
             VALUES (${targetId}, 'sueldo', ${montoSueldo}, ${'Sueldo: ' + sueldo.nombre}, ${saldoActualizado})
           `;
+          // Logro: Tu Primer Sueldo (idempotente: solo se otorga la primera vez)
+          await otorgarLogro(sql, targetId, "primer_sueldo");
         }
       }
+
+      // Revisa logros de saldo (3M/20M/50M/100M/1000M) con el saldo final
+      await checkLogrosSaldo(sql, targetId, saldoActualizado);
 
       const updated = await sql`SELECT * FROM banco WHERE discord_id = ${targetId}`;
       const sueldosActivos = await sql`
@@ -210,6 +217,9 @@ export default async function handler(req, res) {
         VALUES (${discord_id}, 'ingreso', ${SALDO_INICIAL}, 'Apertura de cuenta bancaria', ${SALDO_INICIAL})
       `;
 
+      // Logro: El Comienzo (abrir la cuenta bancaria)
+      await otorgarLogro(sql, discord_id, "comienzo");
+
       return res.status(201).json({ existe: true, cuenta: { ...rows[0], saldo: toNumber(rows[0].saldo) } });
     }
 
@@ -265,7 +275,16 @@ export default async function handler(req, res) {
         VALUES (${destDiscordId}, 'ingreso', ${montoNum}, ${'Transferencia recibida de ' + nombreOrigen}, ${dniOrigen[0]?.rut || discord_id}, ${nuevoSaldoDest})
       `;
 
+      await checkLogrosSaldo(sql, discord_id, nuevoSaldoOrigen);
+      await checkLogrosSaldo(sql, destDiscordId, nuevoSaldoDest);
+
       return res.status(200).json({ ok: true, nuevoSaldo: nuevoSaldoOrigen });
+    }
+
+    // ── GET: mis logros ───────────────────────────────────────────────────────
+    if (req.method === "GET" && action === "logros") {
+      const logros = await listarLogrosUsuario(sql, discord_id);
+      return res.status(200).json({ logros });
     }
 
     // ── GET: historial ───────────────────────────────────────────────────────
@@ -320,6 +339,8 @@ export default async function handler(req, res) {
         INSERT INTO transacciones (discord_id, tipo, monto, descripcion, saldo_after)
         VALUES (${discord_id_target}, ${tipo}, ${Math.abs(montoNum)}, ${descripcion || 'Ajuste administrativo'}, ${nuevoSaldo})
       `;
+
+      await checkLogrosSaldo(sql, discord_id_target, nuevoSaldo);
 
       return res.status(200).json({ ok: true, nuevoSaldo });
     }
