@@ -606,6 +606,38 @@
     </div>
   </section>
 
+  <!-- MODAL: recibo de transferencia exitosa — reemplaza el toast de 3s para
+       que el usuario confirme conscientemente montos grandes antes de seguir -->
+  <div class="admin-modal-overlay" id="modal-recibo-transferencia">
+    <div class="admin-modal" style="position:relative;">
+      <button class="admin-modal-close" onclick="cerrarModal('modal-recibo-transferencia')">✕</button>
+      <div class="tx-receipt-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="tx-receipt-titulo">Transferencia exitosa</div>
+      <div class="tx-receipt-monto" id="recibo-tx-monto">$0</div>
+      <div class="tx-receipt-detalle">
+        <div class="tx-receipt-row">
+          <span class="tx-receipt-row-label">Destinatario</span>
+          <span class="tx-receipt-row-val" id="recibo-tx-destino">—</span>
+        </div>
+        <div class="tx-receipt-row">
+          <span class="tx-receipt-row-label">Fecha</span>
+          <span class="tx-receipt-row-val" id="recibo-tx-fecha">—</span>
+        </div>
+        <div class="tx-receipt-row">
+          <span class="tx-receipt-row-label">Tu nuevo saldo</span>
+          <span class="tx-receipt-row-val" id="recibo-tx-saldo">—</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-green" onclick="cerrarModal('modal-recibo-transferencia')" style="flex:1; justify-content:center;">
+          Listo
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ADMIN BANCO -->
   <section class="screen seccion-screen" id="admin-screen">
     <div class="seccion-container" style="max-width:740px;">
@@ -2084,6 +2116,7 @@
 
   <script src="/js/app.js"></script>
   <script src="/js/notificaciones.js"></script>
+  <script src="/js/pull-to-refresh.js"></script>
   <script src="/js/registro-civil.js"></script>
   <script src="/js/banco.js"></script>
   <script src="/js/tienda.js"></script>
