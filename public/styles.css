@@ -2215,7 +2215,8 @@
       border: 1px solid rgba(255,255,255,0.12);
       display: flex; align-items: center; justify-content: center;
       color: rgba(255,255,255,0.85);
-      cursor: pointer;
+      cursor: grab;
+      touch-action: none;
       transition: background 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.15s var(--ease);
     }
     .notif-bell-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.22); }
@@ -2260,6 +2261,12 @@
       opacity: 1; transform: translateY(0) scale(1);
       pointer-events: all;
     }
+    #notif-bell-wrap.nb-anchor-left .notif-panel { right: auto; left: 0; }
+    #notif-bell-wrap.nb-anchor-top .notif-panel { top: auto; bottom: 52px; }
+
+    #notif-bell-wrap { cursor: grab; }
+    #notif-bell-wrap.nb-dragging { cursor: grabbing; }
+    #notif-bell-wrap.nb-dragging .notif-bell-btn { transform: scale(0.96); }
 
     .notif-panel-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -2272,6 +2279,7 @@
       font-family: 'Bebas Neue', sans-serif; font-size: 16px;
       letter-spacing: 0.5px; color: #fff;
     }
+    .notif-panel-acciones { display: flex; align-items: center; gap: 10px; }
     .notif-panel-marcar {
       font-size: 11px; color: rgba(255,255,255,0.4);
       background: none; border: none; cursor: pointer;
@@ -2279,6 +2287,13 @@
       transition: color 0.15s var(--ease);
     }
     .notif-panel-marcar:hover { color: rgba(255,255,255,0.75); }
+    .notif-panel-limpiar {
+      font-size: 11px; color: rgba(248,113,113,0.65);
+      background: none; border: none; cursor: pointer;
+      font-weight: 600; letter-spacing: 0.3px;
+      transition: color 0.15s var(--ease);
+    }
+    .notif-panel-limpiar:hover { color: rgba(248,113,113,0.95); }
 
     .notif-list {
       display: flex; flex-direction: column; gap: 4px;
