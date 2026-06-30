@@ -365,7 +365,14 @@
     /* ═══════════════════════════════════════
        SECCIÓN GENÉRICA (RC, BANCO, etc.)
     ═══════════════════════════════════════ */
-    .seccion-screen { flex-direction: column; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+    /* justify-content: flex-start (no "center", que hereda de .screen) es
+       el fix real: con "center" + overflow-y:auto, cuando el contenido
+       crece más que el viewport (ej. al ir agregando policías/admins en
+       Panel Admin), el navegador no permite hacer scroll hacia la parte
+       que se sale "por arriba" — solo se puede bajar, nunca volver a
+       subir hasta el header. Mismo fix que ya se usaba en Casino, Apuestas
+       y Admin Casino; faltaba aplicarlo acá también. */
+    .seccion-screen { flex-direction: column; justify-content: flex-start; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 
     /* Tienda e inventario: fix scroll en móvil cuando hay muchos productos */
     #tienda-screen,
