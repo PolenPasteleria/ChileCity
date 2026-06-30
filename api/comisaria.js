@@ -211,15 +211,26 @@ export default async function handler(req, res) {
       try {
         const cuenta = await sql`SELECT saldo FROM banco WHERE discord_id = ${ciudadano_id}`;
         if (cuenta.length > 0 && Number(cuenta[0].saldo) >= Number(valor)) {
-          await sql`UPDATE banco SET saldo = saldo - ${valor} WHERE discord_id = ${ciudadano_id}`;
+          const nuevoSaldo = Number(cuenta[0].saldo) - Number(valor);
+          await sql`UPDATE banco SET saldo = ${nuevoSaldo} WHERE discord_id = ${ciudadano_id}`;
+          // OJO: "transacciones" exige saldo_after (NOT NULL, sin default).
+          // Antes este INSERT no lo incluía, así que SIEMPRE fallaba: el
+          // saldo ya se había descontado arriba, pero como la excepción caía
+          // en el catch de abajo, el UPDATE de "multas" a 'pagada' nunca se
+          // ejecutaba y la multa quedaba en 'pendiente' para siempre aunque
+          // ya se le hubiera cobrado el dinero al ciudadano.
           await sql`
-            INSERT INTO transacciones (discord_id, tipo, monto, descripcion)
-            VALUES (${ciudadano_id}, 'egreso', ${valor}, ${"Cobro automático de multa: " + motivo})
+            INSERT INTO transacciones (discord_id, tipo, monto, descripcion, saldo_after)
+            VALUES (${ciudadano_id}, 'egreso', ${valor}, ${"Cobro automático de multa: " + motivo}, ${nuevoSaldo})
           `;
           await sql`UPDATE multas SET estado = 'pagada' WHERE id = ${rows[0].id}`;
           rows[0].estado = "pagada";
         }
-      } catch (_) { /* La cuenta bancaria puede no existir */ }
+      } catch (e) {
+        // La cuenta bancaria puede no existir todavía; cualquier otro error
+        // se deja registrado para poder diagnosticarlo (antes quedaba mudo).
+        console.error("Error al cobrar multa automáticamente:", e);
+      }
 
       await registrarLog(sql, discord_id, discord_name, "CREAR_MULTA",
         `Multó a ${ciudadano_nombre || ciudadano_id} por: ${motivo} ($${valor})`);

@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { requireSession } from "../lib/auth.js";
 import { BASE_URL } from "../lib/constants.js";
+import { ensureLogrosSchema, LOGROS } from "../lib/logros.js";
 
 let schemaReady = false;
 async function ensureSchema(sql) {
@@ -19,6 +20,8 @@ async function ensureSchema(sql) {
       created_at   TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  await sql`ALTER TABLE dni ADD COLUMN IF NOT EXISTS discord_username TEXT`;
+  await ensureLogrosSchema(sql);
   schemaReady = true;
 }
 
@@ -56,7 +59,8 @@ export default async function handler(req, res) {
     // Búsqueda de DNIs (paginada)
     let dnis, totalRow;
     if (q && q.trim()) {
-      const busq = `%${q.trim().toLowerCase()}%`;
+      // Acepta buscar con o sin "@" delante del usuario de Discord.
+      const busq = `%${q.trim().replace(/^@/, "").toLowerCase()}%`;
       [dnis, totalRow] = await Promise.all([
         sql`
           SELECT * FROM dni
@@ -65,6 +69,7 @@ export default async function handler(req, res) {
              OR LOWER(apellido1) LIKE ${busq}
              OR LOWER(apellido2) LIKE ${busq}
              OR LOWER(rut)       LIKE ${busq}
+             OR LOWER(discord_username) LIKE ${busq}
           ORDER BY apellido1, nombre1
           LIMIT ${limit} OFFSET ${offset}
         `,
@@ -75,6 +80,7 @@ export default async function handler(req, res) {
              OR LOWER(apellido1) LIKE ${busq}
              OR LOWER(apellido2) LIKE ${busq}
              OR LOWER(rut)       LIKE ${busq}
+             OR LOWER(discord_username) LIKE ${busq}
         `,
       ]);
     } else {
@@ -86,18 +92,19 @@ export default async function handler(req, res) {
     const total = totalRow[0]?.total || 0;
 
     const ids = dnis.map(d => d.discord_id);
-    let inventarios = [], multas = [], antecedentes = [];
+    let inventarios = [], multas = [], antecedentes = [], logrosRows = [];
 
     if (ids.length > 0) {
-      [inventarios, multas, antecedentes] = await Promise.all([
+      [inventarios, multas, antecedentes, logrosRows] = await Promise.all([
         sql`SELECT * FROM inventario WHERE discord_id = ANY(${ids}) ORDER BY comprado_at DESC`,
         sql`SELECT * FROM multas WHERE ciudadano_id = ANY(${ids}) ORDER BY created_at DESC`,
         sql`SELECT * FROM antecedentes WHERE ciudadano_id = ANY(${ids}) ORDER BY created_at DESC`,
+        sql`SELECT discord_id, codigo, created_at FROM logros_usuario WHERE discord_id = ANY(${ids})`,
       ]);
     }
 
     // Construir mapas por discord_id
-    const invMap = {}, multaMap = {}, antMap = {};
+    const invMap = {}, multaMap = {}, antMap = {}, logroMap = {};
     for (const item of inventarios) {
       if (!invMap[item.discord_id]) invMap[item.discord_id] = [];
       invMap[item.discord_id].push({ ...item, precio_pagado: toNumber(item.precio_pagado) });
@@ -110,25 +117,39 @@ export default async function handler(req, res) {
       if (!antMap[a.ciudadano_id]) antMap[a.ciudadano_id] = [];
       antMap[a.ciudadano_id].push(a);
     }
+    for (const lg of logrosRows) {
+      if (!logroMap[lg.discord_id]) logroMap[lg.discord_id] = {};
+      logroMap[lg.discord_id][lg.codigo] = lg.created_at;
+    }
 
     return res.status(200).json({
       page,
       limit,
       total,
       hasMore: offset + dnis.length < total,
-      registros: dnis.map(d => ({
-        discord_id:   d.discord_id,
-        nombre1:      d.nombre1,
-        nombre2:      d.nombre2,
-        apellido1:    d.apellido1,
-        apellido2:    d.apellido2,
-        rut:          d.rut,
-        fecha_nac:    d.fecha_nac,
-        nacionalidad: d.nacionalidad || "Chilena",
-        inventario:   invMap[d.discord_id]   || [],
-        multas:       multaMap[d.discord_id]  || [],
-        antecedentes: antMap[d.discord_id]    || [],
-      })),
+      registros: dnis.map(d => {
+        const obtenidos = logroMap[d.discord_id] || {};
+        const logros = LOGROS.map(l => ({
+          ...l,
+          obtenido: Boolean(obtenidos[l.codigo]),
+          fecha: obtenidos[l.codigo] || null,
+        }));
+        return {
+          discord_id:       d.discord_id,
+          discord_username: d.discord_username || null,
+          nombre1:      d.nombre1,
+          nombre2:      d.nombre2,
+          apellido1:    d.apellido1,
+          apellido2:    d.apellido2,
+          rut:          d.rut,
+          fecha_nac:    d.fecha_nac,
+          nacionalidad: d.nacionalidad || "Chilena",
+          inventario:   invMap[d.discord_id]   || [],
+          multas:       multaMap[d.discord_id]  || [],
+          antecedentes: antMap[d.discord_id]    || [],
+          logros,
+        };
+      }),
     });
   } catch (err) {
     console.error("Error en /api/perfil-publico:", err);

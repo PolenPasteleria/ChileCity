@@ -40,9 +40,10 @@ export default async function handler(req, res) {
     //    recibe ni necesita el discord_id por la URL: cada API lo lee de la
     //    cookie, así nadie puede falsificar de quién es la sesión.
     setSessionCookie(res, {
-      id:     user.id,
-      name:   user.global_name || user.username,
-      tag:    user.discriminator !== "0" ? `#${user.discriminator}` : "",
+      id:       user.id,
+      name:     user.global_name || user.username,
+      tag:      user.discriminator !== "0" ? `#${user.discriminator}` : "",
+      username: user.username || null, // @handle real de Discord, usado para buscar por usuario en Perfil Público
       avatar,
     });
 

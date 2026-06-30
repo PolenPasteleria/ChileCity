@@ -47,6 +47,10 @@ async function initTable(sql) {
       created_at   TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  // Usuario de Discord (@handle) asociado al DNI, para poder buscarlo desde
+  // Perfil Público. Se agrega con ALTER porque la tabla puede ya existir de
+  // versiones anteriores sin esta columna.
+  await sql`ALTER TABLE dni ADD COLUMN IF NOT EXISTS discord_username TEXT`;
   schemaReady = true;
 }
 
@@ -75,6 +79,14 @@ export default async function handler(req, res) {
     if (req.method === "GET") {
       const rows = await sql`SELECT * FROM dni WHERE discord_id = ${discord_id}`;
       if (rows.length === 0) return res.status(404).json({ existe: false });
+
+      // Mantiene el @usuario de Discord guardado al día (puede cambiar con
+      // el tiempo). Solo escribe si realmente cambió, para no gastar una
+      // query de UPDATE en cada carga.
+      if (session.username && rows[0].discord_username !== session.username) {
+        await sql`UPDATE dni SET discord_username = ${session.username} WHERE discord_id = ${discord_id}`;
+        rows[0].discord_username = session.username;
+      }
 
       return res.status(200).json({ existe: true, dni: rows[0] });
     }
@@ -109,8 +121,8 @@ export default async function handler(req, res) {
       const a2 = apellido2.trim().toUpperCase();
 
       const rows = await sql`
-        INSERT INTO dni (discord_id, rut, nombre1, nombre2, apellido1, apellido2, fecha_nac)
-        VALUES (${discord_id}, ${rut}, ${n1}, ${n2}, ${a1}, ${a2}, ${fecha_nac})
+        INSERT INTO dni (discord_id, rut, nombre1, nombre2, apellido1, apellido2, fecha_nac, discord_username)
+        VALUES (${discord_id}, ${rut}, ${n1}, ${n2}, ${a1}, ${a2}, ${fecha_nac}, ${session.username || null})
         RETURNING *
       `;
 
