@@ -157,24 +157,26 @@
   <section class="screen" id="dashboard">
     <nav class="dash-nav">
       <div class="dash-logo">ChileCity RP</div>
-      <div class="user-pill" id="user-pill">
-        <div class="user-avatar">
-          <img src="" alt="Avatar" id="discord-avatar">
-        </div>
-        <div>
-          <div class="user-name" id="discord-name">Usuario</div>
-          <div class="user-tag" id="discord-tag"></div>
-        </div>
-        <span class="chevron">▾</span>
-        <div class="logout-dropdown">
-          <button class="logout-btn" id="portal-btn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            Volver al inicio
-          </button>
-          <button class="logout-btn" id="logout-btn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Cerrar sesión
-          </button>
+      <div class="dash-nav-right">
+        <button class="nav-back-btn" id="portal-btn" title="Volver al inicio">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>Inicio</span>
+        </button>
+        <div class="user-pill" id="user-pill">
+          <div class="user-avatar">
+            <img src="" alt="Avatar" id="discord-avatar">
+          </div>
+          <div>
+            <div class="user-name" id="discord-name">Usuario</div>
+            <div class="user-tag" id="discord-tag"></div>
+          </div>
+          <span class="chevron">▾</span>
+          <div class="logout-dropdown">
+            <button class="logout-btn" id="logout-btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </div>
     </nav>
