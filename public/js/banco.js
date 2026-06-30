@@ -162,6 +162,7 @@
           document.getElementById('bank-saldo').textContent = formatCLP(data.nuevoSaldo);
           okEl.textContent = `Transferencia exitosa. Nuevo saldo: ${formatCLP(data.nuevoSaldo)}`;
           okEl.classList.add('visible');
+          if (typeof sonidoConfirmacion === 'function') sonidoConfirmacion();
           document.getElementById('transfer-rut').value = '';
           document.getElementById('transfer-monto').value = '';
         }
@@ -198,7 +199,7 @@
           return `<div class="historial-item">
             <div class="hi-icono ${t.tipo}">${icono}</div>
             <div class="hi-desc">
-              <div class="hi-desc-titulo">${t.descripcion || t.tipo}</div>
+              <div class="hi-desc-titulo">${escHtml(t.descripcion || t.tipo)}</div>
               <div class="hi-desc-fecha">${fecha}</div>
             </div>
             <div class="hi-monto ${t.tipo}">${signo}${formatCLP(t.monto)}</div>
@@ -238,19 +239,19 @@
         lista.innerHTML = data.usuarios.map(u => `
           <div class="usuario-row">
             <div class="ur-info">
-              <div class="ur-nombre">${u.nombre1 || '?'} ${u.apellido1 || ''}</div>
-              <div class="ur-rut">${u.rut || u.discord_id}</div>
+              <div class="ur-nombre">${escHtml(u.nombre1 || '?')} ${escHtml(u.apellido1 || '')}</div>
+              <div class="ur-rut">${escHtml(u.rut || u.discord_id)}</div>
             </div>
             <div class="ur-saldo">${formatCLP(u.saldo)}</div>
             <div class="ur-acciones">
-              <button class="btn-small purple" onclick="abrirModalSaldo('${u.discord_id}','${u.nombre1} ${u.apellido1}')">
+              <button class="btn-small purple" onclick="abrirModalSaldo('${escHtml(u.discord_id)}','${escHtml(u.nombre1 + ' ' + u.apellido1)}')">
                 Ajustar
               </button>
               <button class="btn-small" style="background:rgba(245,158,11,0.15);color:var(--gold);border:1px solid rgba(245,158,11,0.25);"
-                onclick="seleccionarParaSueldo('${u.discord_id}','${u.nombre1} ${u.apellido1}')">
+                onclick="seleccionarParaSueldo('${escHtml(u.discord_id)}','${escHtml(u.nombre1 + ' ' + u.apellido1)}')">
                 Sueldos
               </button>
-              <button class="btn-small orange" onclick="abrirModalReset('${u.discord_id}','${u.nombre1} ${u.apellido1}')">
+              <button class="btn-small orange" onclick="abrirModalReset('${escHtml(u.discord_id)}','${escHtml(u.nombre1 + ' ' + u.apellido1)}')">
                 Resetear
               </button>
             </div>
@@ -357,7 +358,7 @@
         lista.innerHTML = sueldos.map(s => `
           <div class="sueldo-item">
             <div class="si-info">
-              <div class="si-nombre">${s.nombre}</div>
+              <div class="si-nombre">${escHtml(s.nombre)}</div>
               <div class="si-detalle">${formatCLP(s.monto)} cada ${s.dias} día(s)</div>
             </div>
             <button class="btn-small red" onclick="adminEliminarSueldo(${s.id})">Quitar</button>
@@ -449,14 +450,14 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
             <div class="hi-desc" style="flex:1;">
-              <div class="hi-desc-titulo">${c.nombre}</div>
-              <div class="hi-desc-fecha">${c.rut}</div>
+              <div class="hi-desc-titulo">${escHtml(c.nombre)}</div>
+              <div class="hi-desc-fecha">${escHtml(c.rut)}</div>
             </div>
             <div style="display:flex;gap:6px;align-items:center;">
               <button class="btn-small" style="background:rgba(16,185,129,0.12);color:#10B981;border:1px solid rgba(16,185,129,0.25);font-size:11px;padding:4px 10px;"
-                onclick="transferirAContacto('${c.rut}')">Transferir</button>
+                onclick="transferirAContacto('${escHtml(c.rut)}')">Transferir</button>
               <button class="btn-small red" style="font-size:11px;padding:4px 10px;"
-                onclick="eliminarContacto(${c.id})">✕</button>
+                onclick="eliminarContacto(${Number(c.id)})">✕</button>
             </div>
           </div>
         `).join('');

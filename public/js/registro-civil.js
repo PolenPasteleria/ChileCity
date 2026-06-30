@@ -53,7 +53,7 @@
       }
     }
 
-    function mostrarCarnet(dni) {
+    function mostrarCarnet(dni, esNuevo = false) {
       document.getElementById('carnet-apellidos').textContent = `${dni.apellido1} ${dni.apellido2}`;
       document.getElementById('carnet-nombres').textContent   = `${dni.nombre1} ${dni.nombre2}`;
       document.getElementById('carnet-nac').textContent       = dni.nacionalidad || 'Chilena';
@@ -67,7 +67,15 @@
         img.style.display = 'block';
         icono.style.display = 'none';
       }
-      document.getElementById('rc-carnet-wrap').style.display = 'block';
+      const wrap = document.getElementById('rc-carnet-wrap');
+      wrap.style.display = 'block';
+
+      if (esNuevo) {
+        wrap.classList.remove('rc-carnet-reveal');
+        void wrap.offsetWidth; // reflow, para poder repetir la animación
+        wrap.classList.add('rc-carnet-reveal');
+        if (typeof sonidoConfirmacion === 'function') sonidoConfirmacion();
+      }
     }
 
     function formatearFecha(f) {
@@ -109,7 +117,7 @@
         }
         currentDNI = data.dni;
         document.getElementById('rc-form').style.display = 'none';
-        mostrarCarnet(data.dni);
+        mostrarCarnet(data.dni, true);
       } catch (err) {
         mostrarErrorRC('Error de conexión.');
         btn.disabled = false;

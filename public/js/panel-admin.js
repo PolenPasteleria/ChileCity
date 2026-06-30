@@ -31,12 +31,12 @@
           div.innerHTML = `
             <div style="display:flex;flex-direction:column;gap:3px;">
               <div style="display:flex;align-items:center;gap:8px;">
-                <span style="font-size:14px;color:#fff;font-weight:500;">${admin.nombre || 'Sin nombre'}</span>
+                <span style="font-size:14px;color:#fff;font-weight:500;">${escHtml(admin.nombre || 'Sin nombre')}</span>
                 ${esSuperAdmin ? '<span style="font-size:10px;background:rgba(220,38,38,0.3);color:#fca5a5;padding:2px 8px;border-radius:20px;font-weight:600;">SUPER ADMIN</span>' : '<span style="font-size:10px;background:rgba(168,85,247,0.25);color:#d8b4fe;padding:2px 8px;border-radius:20px;">ADMIN</span>'}
               </div>
-              <span style="font-size:11px;color:#6b7280;font-family:monospace;">${admin.discord_id}</span>
+              <span style="font-size:11px;color:#6b7280;font-family:monospace;">${escHtml(admin.discord_id)}</span>
             </div>
-            ${esSuperAdmin ? '' : `<button onclick="paEliminarAdmin('${admin.discord_id}')" style="background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.3);border-radius:8px;padding:7px 14px;color:#f87171;font-size:12px;cursor:pointer;">Eliminar</button>`}
+            ${esSuperAdmin ? '' : `<button onclick="paEliminarAdmin('${escHtml(admin.discord_id)}')" style="background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.3);border-radius:8px;padding:7px 14px;color:#f87171;font-size:12px;cursor:pointer;">Eliminar</button>`}
           `;
           lista.appendChild(div);
         });

@@ -43,6 +43,7 @@
         // atención sin ser invasivo con sonido.
         if (!notifPrimeraCarga && (data.noLeidas || 0) > noLeidasPrevias) {
           notifAgitarCampana();
+          if (typeof sonidoNotificacion === 'function') sonidoNotificacion();
         }
         notifPrimeraCarga = false;
       } catch { /* fallo silencioso: no rompe la navegación por esto */ }

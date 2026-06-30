@@ -150,6 +150,7 @@
       container.appendChild(el);
       requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
       el._timer = setTimeout(() => removeToast(el), 4000);
+      if (type === 'success' && typeof sonidoConfirmacion === 'function') sonidoConfirmacion();
     }
     function removeToast(el) {
       clearTimeout(el._timer);

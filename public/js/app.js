@@ -378,6 +378,45 @@
       }
     }
 
+    // ── Sonidos generales de UI (notificación / confirmación) ────────────────
+    // Mismo motor de audio que sonidoVictoria/sonidoDerrota, pero pensado para
+    // microinteracciones discretas: avisar una notificación nueva o confirmar
+    // que una acción (transferencia, compra, registro) se completó bien.
+    function sonidoNotificacion() {
+      const ctx = _fbGetCtx(); if (!ctx) return;
+      // Dos tonos cortos tipo "ping" suave, no intrusivo
+      const notas = [880, 1108.73];
+      notas.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const t = ctx.currentTime + i * 0.1;
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.09, t + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+        osc.start(t); osc.stop(t + 0.24);
+      });
+    }
+
+    function sonidoConfirmacion() {
+      const ctx = _fbGetCtx(); if (!ctx) return;
+      // Click breve y limpio, tipo "listo" — para transferencias, compras,
+      // registros y otras acciones exitosas que no son apuestas/juegos.
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      const t = ctx.currentTime;
+      osc.frequency.setValueAtTime(660, t);
+      osc.frequency.exponentialRampToValueAtTime(990, t + 0.09);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.12, t + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+      osc.start(t); osc.stop(t + 0.2);
+    }
+
     // ── Cerrar modales con Escape ────────────────────────────────────────────
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
