@@ -10,15 +10,9 @@
   "icons": [
     {
       "src": "/logo.webp",
-      "sizes": "192x192",
+      "sizes": "128x128",
       "type": "image/webp",
       "purpose": "any maskable"
-    },
-    {
-      "src": "/logo.webp",
-      "sizes": "512x512",
-      "type": "image/webp",
-      "purpose": "any"
     }
   ]
 }
