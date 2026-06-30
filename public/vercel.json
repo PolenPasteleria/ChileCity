@@ -1,0 +1,24 @@
+{
+  "rewrites": [
+    { "source": "/auth/login",    "destination": "/api/login" },
+    { "source": "/auth/callback", "destination": "/api/callback" },
+    { "source": "/api/dni",       "destination": "/api/dni" },
+    { "source": "/api/banco",     "destination": "/api/banco" },
+    { "source": "/api/tienda",    "destination": "/api/tienda" },
+    { "source": "/api/admin",      "destination": "/api/admin" },
+    { "source": "/api/empresas",   "destination": "/api/empresas" },
+    { "source": "/api/comisaria",  "destination": "/api/comisaria" },
+    { "source": "/api/casino",     "destination": "/api/casino" },
+    { "source": "/api/apuestas",       "destination": "/api/apuestas" },
+    { "source": "/api/perfil-publico", "destination": "/api/perfil-publico" },
+    { "source": "/api/notificaciones", "destination": "/api/notificaciones" },
+    { "source": "/api/logout",         "destination": "/api/session?ruta=logout" },
+    { "source": "/api/me",             "destination": "/api/session?ruta=me" },
+    { "source": "/manifest.json",  "destination": "/public/manifest.json" },
+    { "source": "/favicon.svg",    "destination": "/public/favicon.svg" },
+    { "source": "/styles.css",     "destination": "/public/styles.css" },
+    { "source": "/logo.webp",      "destination": "/public/logo.webp" },
+    { "source": "/js/:file",       "destination": "/public/js/:file" },
+    { "source": "/",              "destination": "/public/index.html" }
+  ]
+}
