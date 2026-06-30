@@ -44,7 +44,7 @@
     }
 
     function apRenderLogo(url, nombre) {
-      if (url) return `<img src="${escHtml(url)}" alt="${escHtml(nombre)}" onerror="this.style.display='none';this.parentElement.textContent='⚽'">`;
+      if (url) return `<img src="${escHtml(url)}" alt="${escHtml(nombre)}" loading="lazy" onerror="this.style.display='none';this.parentElement.textContent='⚽'">`;
       return '⚽';
     }
 

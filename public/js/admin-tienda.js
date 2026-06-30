@@ -30,7 +30,7 @@
           <div class="admin-producto-row" id="apr-${p.id}">
             <div class="apr-img">
               ${p.imagen_url
-                ? `<img src="${escHtml(p.imagen_url)}" alt="${escHtml(p.nombre)}" onerror="this.parentElement.innerHTML='${catEmoji(p.categoria)}';">`
+                ? `<img src="${escHtml(p.imagen_url)}" alt="${escHtml(p.nombre)}" loading="lazy" onerror="this.parentElement.innerHTML='${catEmoji(p.categoria)}';">`
                 : catEmoji(p.categoria)}
             </div>
             <div class="apr-info">
@@ -265,7 +265,7 @@
                 <div class="inv-admin-item-row" id="iai-${item.id}">
                   <div class="iai-img">
                     ${item.imagen_url
-                      ? `<img src="${escHtml(item.imagen_url)}" alt="${escHtml(item.nombre)}" onerror="this.parentElement.innerHTML='${catEmoji(item.categoria)}';">`
+                      ? `<img src="${escHtml(item.imagen_url)}" alt="${escHtml(item.nombre)}" loading="lazy" onerror="this.parentElement.innerHTML='${catEmoji(item.categoria)}';">`
                       : catEmoji(item.categoria)}
                   </div>
                   <div class="iai-info">

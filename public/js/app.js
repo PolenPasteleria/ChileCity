@@ -438,3 +438,12 @@
       const admModal = document.getElementById('adm-edit-overlay');
       if (admModal && admModal.classList.contains('open')) admModal.classList.remove('open');
     });
+
+    // ── Service Worker (PWA: cache de estáticos + soporte offline básico) ──
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {
+          // Si falla el registro (ej. navegador raro), la app sigue funcionando normal sin SW.
+        });
+      });
+    }

@@ -85,7 +85,7 @@
         <div class="producto-card">
           <div class="producto-img">
             ${p.imagen_url
-              ? `<img src="${escHtml(p.imagen_url)}" alt="${escHtml(p.nombre)}" onerror="this.parentElement.innerHTML='${catEmoji(p.categoria)}';">`
+              ? `<img src="${escHtml(p.imagen_url)}" alt="${escHtml(p.nombre)}" loading="lazy" onerror="this.parentElement.innerHTML='${catEmoji(p.categoria)}';">`
               : catEmoji(p.categoria)}
           </div>
           <div class="producto-info">
@@ -220,7 +220,7 @@
             <div class="inv-card">
               <div class="inv-img">
                 ${item.imagen_url
-                  ? `<img src="${escHtml(item.imagen_url)}" alt="${escHtml(item.nombre)}" onerror="this.parentElement.innerHTML='${catEmoji(item.categoria)}';">`
+                  ? `<img src="${escHtml(item.imagen_url)}" alt="${escHtml(item.nombre)}" loading="lazy" onerror="this.parentElement.innerHTML='${catEmoji(item.categoria)}';">`
                   : catEmoji(item.categoria)}
               </div>
               <div class="inv-info">

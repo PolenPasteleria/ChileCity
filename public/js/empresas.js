@@ -41,7 +41,7 @@
         <div class="empresa-card">
           <div class="empresa-logo">
             ${e.logo_url
-              ? `<img src="${escHtml(e.logo_url)}" alt="${escHtml(e.nombre)}" onerror="this.parentElement.innerHTML='🏢';">`
+              ? `<img src="${escHtml(e.logo_url)}" alt="${escHtml(e.nombre)}" loading="lazy" onerror="this.parentElement.innerHTML='🏢';">`
               : '🏢'}
           </div>
           <div class="empresa-info">
@@ -52,7 +52,7 @@
           <div class="empresa-dueno">
             <div class="empresa-dueno-avatar">
               ${e.dueno_avatar_url
-                ? `<img src="${escHtml(e.dueno_avatar_url)}" alt="${escHtml(e.dueno_nombre)}" onerror="this.parentElement.innerHTML='👤';">`
+                ? `<img src="${escHtml(e.dueno_avatar_url)}" alt="${escHtml(e.dueno_nombre)}" loading="lazy" onerror="this.parentElement.innerHTML='👤';">`
                 : '👤'}
             </div>
             <span>Dueño: <strong>${escHtml(e.dueno_nombre)}</strong></span>
@@ -136,7 +136,7 @@
         <div class="usuario-row">
           <div class="empresa-logo" style="width:46px;height:46px;flex-shrink:0;">
             ${e.logo_url
-              ? `<img src="${escHtml(e.logo_url)}" alt="${escHtml(e.nombre)}" onerror="this.parentElement.innerHTML='🏢';">`
+              ? `<img src="${escHtml(e.logo_url)}" alt="${escHtml(e.nombre)}" loading="lazy" onerror="this.parentElement.innerHTML='🏢';">`
               : '🏢'}
           </div>
           <div style="flex:1;min-width:0;">

@@ -146,7 +146,7 @@
           const card = document.createElement('div');
           card.style.cssText = 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;display:flex;gap:16px;';
           const fotoHtml = a.foto_url
-            ? `<img src="${escHtml(a.foto_url)}" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,0.1);flex-shrink:0;" onerror="this.style.display='none'">`
+            ? `<img src="${escHtml(a.foto_url)}" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,0.1);flex-shrink:0;" loading="lazy" onerror="this.style.display='none'">`
             : `<div style="width:72px;height:72px;background:rgba(255,255,255,0.06);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:28px;">📷</div>`;
           card.innerHTML = `
             ${fotoHtml}
@@ -369,7 +369,7 @@
           const card = document.createElement('div');
           card.style.cssText = 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px;display:flex;gap:14px;flex-wrap:wrap;';
           const fotoHtml = a.foto_url
-            ? `<img src="${escHtml(a.foto_url)}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;flex-shrink:0;" onerror="this.style.display='none'">`
+            ? `<img src="${escHtml(a.foto_url)}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;flex-shrink:0;" loading="lazy" onerror="this.style.display='none'">`
             : '';
           card.innerHTML = `
             ${fotoHtml}

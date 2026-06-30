@@ -153,7 +153,7 @@
               <div class="pp-inv-item">
                 <div class="pp-inv-img">
                   ${item.imagen_url
-                    ? `<img src="${escHtml(item.imagen_url)}" alt="${escHtml(item.nombre)}" onerror="this.parentElement.innerHTML='${catEmoji(item.categoria)}';">`
+                    ? `<img src="${escHtml(item.imagen_url)}" alt="${escHtml(item.nombre)}" loading="lazy" onerror="this.parentElement.innerHTML='${catEmoji(item.categoria)}';">`
                     : catEmoji(item.categoria)}
                 </div>
                 <div class="pp-inv-nombre">${escHtml(item.nombre)}</div>
