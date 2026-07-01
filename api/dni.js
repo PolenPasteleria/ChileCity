@@ -51,6 +51,9 @@ async function initTable(sql) {
   // Perfil Público. Se agrega con ALTER porque la tabla puede ya existir de
   // versiones anteriores sin esta columna.
   await sql`ALTER TABLE dni ADD COLUMN IF NOT EXISTS discord_username TEXT`;
+  // Biografía corta del ciudadano, editable desde la card de perfil del
+  // dashboard. Nullable: no todos la habrán llenado.
+  await sql`ALTER TABLE dni ADD COLUMN IF NOT EXISTS bio TEXT`;
   schemaReady = true;
 }
 
@@ -58,7 +61,7 @@ export default async function handler(req, res) {
   // CORS restringido al propio dominio (antes era "*", abierto a cualquiera)
   res.setHeader("Access-Control-Allow-Origin", BASE_URL);
   res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") return res.status(200).end();
 
@@ -130,6 +133,22 @@ export default async function handler(req, res) {
       await otorgarLogro(sql, discord_id, "bienvenido");
 
       return res.status(201).json({ existe: true, dni: rows[0] });
+    }
+
+    // ── PATCH: actualizar mi biografía (card de perfil del dashboard) ───────
+    if (req.method === "PATCH") {
+      let { bio } = req.body || {};
+      bio = (bio ?? "").toString().trim().slice(0, 160);
+
+      const rows = await sql`
+        UPDATE dni SET bio = ${bio || null}
+        WHERE discord_id = ${discord_id}
+        RETURNING *
+      `;
+      if (rows.length === 0) {
+        return res.status(404).json({ error: "Primero debes crear tu cédula de identidad." });
+      }
+      return res.status(200).json({ existe: true, dni: rows[0] });
     }
 
     return res.status(405).json({ error: "Método no permitido" });
