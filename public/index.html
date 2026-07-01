@@ -2437,18 +2437,29 @@
       ppDespertarScroll();
     }
 
-    // Workaround para un bug conocido de iOS Safari: dentro de un contenedor
-    // con -webkit-overflow-scrolling:touch, si el contenido cambia de alto
-    // de golpe (como al mostrar un panel con muchos logros), el scroll
-    // puede quedar "trabado" y dejar de responder hacia arriba. Forzar un
-    // reflow apagando y prendiendo esa propiedad lo destraba.
+    // Workaround para un bug conocido de iOS Safari: la combinación de
+    // -webkit-overflow-scrolling:touch + overscroll-behavior:contain (ambas
+    // están en .pp-screen, vía CSS) hace que, si el contenido cambia de alto
+    // de golpe (como al abrir una card o mostrar un panel con muchos logros),
+    // el scroll quede "trabado" y deje de responder hacia arriba.
+    // El fix anterior solo apagaba/prendía -webkit-overflow-scrolling, pero
+    // dejaba overscroll-behavior:contain activo todo el tiempo, que es la
+    // otra mitad de la combinación que gatilla el freeze. Ahora se sueltan
+    // ambas propiedades, se fuerza un reflow real (toggle de overflow, no
+    // solo lectura de offsetHeight) y se restauran en el frame siguiente.
     function ppDespertarScroll() {
       const scroller = document.getElementById('perfil-publico-screen');
       if (!scroller) return;
       requestAnimationFrame(() => {
         scroller.style.webkitOverflowScrolling = 'auto';
+        scroller.style.overscrollBehavior = 'auto';
+        scroller.style.overflowY = 'hidden';
         void scroller.offsetHeight; // fuerza el reflow
-        scroller.style.webkitOverflowScrolling = 'touch';
+        requestAnimationFrame(() => {
+          scroller.style.overflowY = 'auto';
+          scroller.style.webkitOverflowScrolling = 'touch';
+          scroller.style.overscrollBehavior = 'contain';
+        });
       });
     }
   </script>
