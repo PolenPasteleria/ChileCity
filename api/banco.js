@@ -3,6 +3,7 @@ import { requireSession } from "../lib/auth.js";
 import { SUPER_ADMIN_ID, BASE_URL, RATE_TRANSFER_SEG } from "../lib/constants.js";
 import { checkRateLimit } from "../lib/rateLimit.js";
 import { ensureLogrosSchema, otorgarLogro, checkLogrosSaldo, listarLogrosUsuario } from "../lib/logros.js";
+import { ensureStaffLogsSchema, registrarStaffLog } from "../lib/staffLogs.js";
 
 const SALDO_INICIAL = 1000000;
 
@@ -30,6 +31,16 @@ async function getAdminIds(sql) {
   } catch {
     return [SUPER_ADMIN_ID];
   }
+}
+
+// Etiqueta legible para logs de staff: "Nombre Apellido (discord_id)" si el
+// usuario tiene DNI registrado, o solo "(discord_id)" si no.
+async function etiquetaUsuario(sql, discord_id_target) {
+  try {
+    const rows = await sql`SELECT nombre1, apellido1 FROM dni WHERE discord_id = ${discord_id_target}`;
+    if (rows.length > 0) return `${rows[0].nombre1} ${rows[0].apellido1} (${discord_id_target})`;
+  } catch {}
+  return discord_id_target;
 }
 
 let schemaReady = false;
@@ -113,6 +124,7 @@ export default async function handler(req, res) {
     const sql = neon(process.env.DATABASE_URL);
     await initTables(sql);
     await ensureLogrosSchema(sql);
+    await ensureStaffLogsSchema(sql);
 
     const ADMIN_IDS = await getAdminIds(sql);
     const { action } = req.query;
@@ -124,6 +136,7 @@ export default async function handler(req, res) {
     const session = requireSession(req, res);
     if (!session) return; // requireSession ya respondió 401
     const discord_id = session.id;
+    const discord_name = session.name || session.tag || discord_id;
     const esAdmin = ADMIN_IDS.includes(discord_id);
 
     // ── GET: estado de cuenta ────────────────────────────────────────────────
@@ -348,6 +361,11 @@ export default async function handler(req, res) {
 
       await checkLogrosSaldo(sql, discord_id_target, nuevoSaldo);
 
+      const etiqueta = await etiquetaUsuario(sql, discord_id_target);
+      await registrarStaffLog(sql, discord_id, discord_name,
+        montoNum >= 0 ? "SALDO_AGREGAR" : "SALDO_QUITAR",
+        `${montoNum >= 0 ? "Agregó" : "Quitó"} $${Math.abs(montoNum).toLocaleString('es-CL')} ${montoNum >= 0 ? "a" : "de"} ${etiqueta}${descripcion ? ` — "${descripcion}"` : ""}`);
+
       return res.status(200).json({ ok: true, nuevoSaldo });
     }
 
@@ -369,6 +387,10 @@ export default async function handler(req, res) {
         VALUES (${discord_id_target}, 'ajuste', ${SALDO_INICIAL}, 'Cuenta reseteada por administrador', ${SALDO_INICIAL})
       `;
 
+      const etiquetaReset = await etiquetaUsuario(sql, discord_id_target);
+      await registrarStaffLog(sql, discord_id, discord_name, "CUENTA_RESETEAR",
+        `Reseteó la cuenta de ${etiquetaReset} a $${SALDO_INICIAL.toLocaleString('es-CL')}`);
+
       return res.status(200).json({ ok: true, nuevoSaldo: SALDO_INICIAL });
     }
 
@@ -388,6 +410,11 @@ export default async function handler(req, res) {
         VALUES (${discord_id_target}, ${nombre}, ${montoNum}, ${diasNum}, NOW())
         RETURNING *
       `;
+
+      const etiquetaSueldo = await etiquetaUsuario(sql, discord_id_target);
+      await registrarStaffLog(sql, discord_id, discord_name, "SUELDO_AGREGAR",
+        `Agregó el sueldo "${nombre}" ($${montoNum.toLocaleString('es-CL')} cada ${diasNum} día(s)) a ${etiquetaSueldo}`);
+
       return res.status(201).json({ sueldo: { ...rows[0], monto: toNumber(rows[0].monto) } });
     }
 
@@ -397,7 +424,15 @@ export default async function handler(req, res) {
         return res.status(403).json({ error: "No autorizado" });
 
       const { sueldo_id } = req.query;
+      const existente = await sql`SELECT * FROM sueldos WHERE id = ${sueldo_id}`;
       await sql`UPDATE sueldos SET activo = FALSE WHERE id = ${sueldo_id}`;
+
+      if (existente.length > 0) {
+        const etiquetaBorrar = await etiquetaUsuario(sql, existente[0].discord_id);
+        await registrarStaffLog(sql, discord_id, discord_name, "SUELDO_QUITAR",
+          `Quitó el sueldo "${existente[0].nombre}" ($${toNumber(existente[0].monto).toLocaleString('es-CL')}) a ${etiquetaBorrar}`);
+      }
+
       return res.status(200).json({ ok: true });
     }
 

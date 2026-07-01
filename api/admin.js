@@ -2,6 +2,7 @@ import { neon } from "@neondatabase/serverless";
 import { requireSession } from "../lib/auth.js";
 import { SUPER_ADMIN_ID, BASE_URL } from "../lib/constants.js";
 import { ensureLogrosSchema, otorgarLogro, quitarLogro, listarLogrosUsuario } from "../lib/logros.js";
+import { ensureStaffLogsSchema, registrarStaffLog } from "../lib/staffLogs.js";
 
 const MAX_ADMINS = 4; // máximo de admins adicionales (sin contar al super admin)
 
@@ -76,6 +77,7 @@ export default async function handler(req, res) {
     const sql = neon(process.env.DATABASE_URL);
     await initTable(sql);
     await ensureLogrosSchema(sql);
+    await ensureStaffLogsSchema(sql);
 
     const { action } = req.query;
 
@@ -84,6 +86,7 @@ export default async function handler(req, res) {
     const session = requireSession(req, res);
     if (!session) return;
     const discord_id = session.id;
+    const discord_name = session.name || session.tag || discord_id;
 
     // ── GET: verificar si yo soy admin ───────────────────────────────────────
     if (req.method === "GET" && action === "verificar") {
@@ -244,6 +247,9 @@ export default async function handler(req, res) {
         // Logro: Empresario (al asignarle una empresa a su Discord ID)
         await otorgarLogro(sql, dueno_discord_id.trim(), "empresario", discord_id);
 
+        await registrarStaffLog(sql, discord_id, discord_name, "EMPRESA_CREAR",
+          `Creó la empresa "${rows[0].nombre}" (ID ${rows[0].id}), dueño: ${dueno_nombre.trim()} (${dueno_discord_id.trim()})`);
+
         return res.status(201).json({ empresa: rows[0] });
       }
 
@@ -289,7 +295,12 @@ export default async function handler(req, res) {
         const { empresa_id } = req.query;
         if (!empresa_id) return res.status(400).json({ error: "Falta empresa_id" });
 
+        const existente = await sql`SELECT nombre FROM empresas WHERE id = ${empresa_id}`;
         await sql`DELETE FROM empresas WHERE id = ${empresa_id}`;
+
+        await registrarStaffLog(sql, discord_id, discord_name, "EMPRESA_ELIMINAR",
+          `Eliminó la empresa "${existente[0]?.nombre || '—'}" (ID ${empresa_id})`);
+
         return res.status(200).json({ ok: true });
       }
     }
@@ -320,6 +331,10 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: "Faltan campos" });
 
         const otorgado = await otorgarLogro(sql, target_id.trim(), codigo, discord_id);
+
+        await registrarStaffLog(sql, discord_id, discord_name, "LOGRO_OTORGAR",
+          `Otorgó el logro "${codigo}" a ${target_id.trim()}`);
+
         return res.status(200).json({ ok: true, otorgado });
       }
 
@@ -330,6 +345,10 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: "Faltan campos" });
 
         await quitarLogro(sql, target_id.trim(), codigo);
+
+        await registrarStaffLog(sql, discord_id, discord_name, "LOGRO_QUITAR",
+          `Quitó el logro "${codigo}" a ${target_id.trim()}`);
+
         return res.status(200).json({ ok: true });
       }
     }
@@ -369,9 +388,13 @@ export default async function handler(req, res) {
 
         const rows = await sql`
           INSERT INTO staff (discord_id, nombre, agregado_por_id, agregado_por_nombre)
-          VALUES (${target_id.trim()}, ${nombre?.trim() || null}, ${discord_id}, ${session.name || session.tag || discord_id})
+          VALUES (${target_id.trim()}, ${nombre?.trim() || null}, ${discord_id}, ${discord_name})
           RETURNING *
         `;
+
+        await registrarStaffLog(sql, discord_id, discord_name, "STAFF_AUTORIZAR",
+          `Autorizó como Staff a ${nombre?.trim() || target_id.trim()} (${target_id.trim()})`);
+
         return res.status(201).json({ staff: rows[0] });
       }
 
@@ -380,9 +403,37 @@ export default async function handler(req, res) {
         const { target_id } = req.query;
         if (!target_id) return res.status(400).json({ error: "Falta target_id" });
 
+        const existente = await sql`SELECT nombre FROM staff WHERE discord_id = ${target_id}`;
         await sql`DELETE FROM staff WHERE discord_id = ${target_id}`;
+
+        await registrarStaffLog(sql, discord_id, discord_name, "STAFF_REVOCAR",
+          `Revocó el acceso de Staff a ${existente[0]?.nombre || target_id} (${target_id})`);
+
         return res.status(200).json({ ok: true });
       }
+    }
+
+    // ══ LOGS DE STAFF (solo lectura, cualquier admin) ══════════════════════
+    // Registro unificado de todo lo que hace el staff con permisos: Admin
+    // Banco (sueldos, saldos), Gestión de Empresas, Gestión de Logros,
+    // Gestión de Policías y Gestión de Staff. Cada acción se registra desde
+    // el archivo /api correspondiente vía lib/staffLogs.js.
+    if (req.method === "GET" && action === "staff_logs_listar") {
+      const adminRows = await sql`SELECT id FROM admins WHERE discord_id = ${discord_id}`;
+      if (adminRows.length === 0) return res.status(403).json({ error: "No autorizado" });
+
+      const q = (req.query.q || "").trim();
+      const rows = q
+        ? await sql`
+            SELECT * FROM staff_logs
+            WHERE actor_id ILIKE ${"%" + q + "%"}
+               OR actor_nombre ILIKE ${"%" + q + "%"}
+               OR accion ILIKE ${"%" + q + "%"}
+               OR detalle ILIKE ${"%" + q + "%"}
+            ORDER BY created_at DESC LIMIT 200
+          `
+        : await sql`SELECT * FROM staff_logs ORDER BY created_at DESC LIMIT 200`;
+      return res.status(200).json({ logs: rows });
     }
 
     return res.status(405).json({ error: "Método no permitido" });

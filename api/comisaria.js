@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { requireSession } from "../lib/auth.js";
 import { BASE_URL } from "../lib/constants.js";
+import { ensureStaffLogsSchema, registrarStaffLog } from "../lib/staffLogs.js";
 
 let schemaReady = false;
 
@@ -124,6 +125,7 @@ export default async function handler(req, res) {
   try {
     const sql = neon(process.env.DATABASE_URL);
     await initTables(sql);
+    await ensureStaffLogsSchema(sql);
 
     const session = requireSession(req, res);
     if (!session) return;
@@ -182,6 +184,8 @@ export default async function handler(req, res) {
       `;
       await registrarLog(sql, discord_id, discord_name, "AUTORIZAR_POLICIA",
         `Autorizó como Policía Virtual a ${nombre || target_id} (${target_id})`);
+      await registrarStaffLog(sql, discord_id, discord_name, "POLICIA_AUTORIZAR",
+        `Autorizó como Policía Virtual a ${nombre || target_id} (${target_id})`);
       return res.status(201).json({ policia: rows[0] });
     }
 
@@ -196,6 +200,8 @@ export default async function handler(req, res) {
       await sql`DELETE FROM policia_virtual WHERE discord_id = ${target_id}`;
       await registrarLog(sql, discord_id, discord_name, "REVOCAR_POLICIA",
         `Revocó permiso de Policía Virtual a ${row[0]?.nombre || target_id} (${target_id})`);
+      await registrarStaffLog(sql, discord_id, discord_name, "POLICIA_REVOCAR",
+        `Revocó el permiso de Policía Virtual a ${row[0]?.nombre || target_id} (${target_id})`);
       return res.status(200).json({ ok: true });
     }
 
