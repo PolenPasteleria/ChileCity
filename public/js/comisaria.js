@@ -484,75 +484,10 @@
       }
     }
 
-    // ══ GESTIÓN DE POLICÍAS DESDE PANEL ADMIN ══════════════════════════
-    // (Se insertan como tab adicional al cargar el panel admin)
-
-    let _paPoliciaTabInyectado = false;
-
-    function _inyectarTabPolicia() {
-      if (_paPoliciaTabInyectado) return;
-      _paPoliciaTabInyectado = true;
-
-      // Agregar tab button
-      const tabContainer = document.querySelector('#panel-admin-screen .admin-tabs');
-      if (tabContainer) {
-        const btn = document.createElement('button');
-        btn.className = 'admin-tab';
-        btn.textContent = '🚔 Policías Virtuales';
-        btn.onclick = () => { paAdminTab('policias'); };
-        tabContainer.appendChild(btn);
-      }
-
-      // Agregar sección
-      const panel = document.querySelector('#panel-admin-screen .admin-panel');
-      if (panel) {
-        const sec = document.createElement('div');
-        sec.className = 'admin-seccion';
-        sec.id = 'pa-tab-policias';
-        sec.innerHTML = `
-          <h3 style="font-size:16px;font-weight:700;color:#38bdf8;display:flex;align-items:center;gap:8px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Gestión de Policías Virtuales
-          </h3>
-          <div class="rc-form" style="gap:14px;">
-            <h4 style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.7);">Autorizar nuevo policía</h4>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Discord ID</label>
-                <input type="text" id="gp-input-id" placeholder="ID de Discord">
-              </div>
-              <div class="form-group">
-                <label>Nombre (opcional)</label>
-                <input type="text" id="gp-input-nombre" placeholder="Nombre o tag">
-              </div>
-            </div>
-            <p id="gp-msg" style="font-size:13px;color:rgba(255,255,255,0.4);min-height:18px;"></p>
-            <button onclick="gpAutorizar()" style="background:linear-gradient(135deg,rgba(14,165,233,0.2),rgba(14,165,233,0.1));border:1px solid rgba(14,165,233,0.35);border-radius:12px;padding:12px;color:#38bdf8;font-weight:700;font-size:14px;cursor:pointer;">
-              ✦ Autorizar como Policía Virtual
-            </button>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:6px;">
-            <input type="text" id="gp-buscar-q" placeholder="Buscar policía por nombre o ID" style="flex:1;">
-            <button onclick="gpCargarPolicias()" style="background:rgba(14,165,233,0.15);border:1px solid rgba(14,165,233,0.3);border-radius:10px;padding:0 14px;color:#38bdf8;cursor:pointer;font-size:13px;">Buscar</button>
-          </div>
-          <div class="rc-loading" id="gp-loading" style="display:none;"><div class="spinner"></div><span>Cargando...</span></div>
-          <div id="gp-lista"></div>
-        `;
-        panel.appendChild(sec);
-      }
-    }
-
-    function paAdminTab(tab) {
-      document.querySelectorAll('#panel-admin-screen .admin-tab').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('#panel-admin-screen .admin-seccion').forEach(s => s.classList.remove('visible'));
-      const btn = [...document.querySelectorAll('#panel-admin-screen .admin-tab')].find(b => b.textContent.includes(
-        tab === 'admins' ? 'Administradores' : tab === 'logs' ? 'Logs' : 'Policías'
-      ));
-      if (btn) btn.classList.add('active');
-      const sec = document.getElementById(tab === 'admins' ? 'pa-tab-admins' : tab === 'logs' ? 'pa-tab-logs' : 'pa-tab-policias');
-      if (sec) sec.classList.add('visible');
-      if (tab === 'policias') gpCargarPolicias();
-    }
+    // Nota: la gestión de Policías Virtuales ya vive de forma estática dentro
+    // de #panel-admin-screen (sección "Gestión de Policías Virtuales"), que
+    // se carga automáticamente al abrir el Panel Admin vía abrirPanelAdmin()
+    // en app.js. Ya no hace falta inyectar ni construir tabs dinámicamente.
 
     async function gpCargarPolicias() {
       const q       = document.getElementById('gp-buscar-q')?.value?.trim() || '';
@@ -629,17 +564,4 @@
       if (!iso) return '—';
       return new Date(iso).toLocaleDateString('es-CL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
     }
-
-    // Inyectar tab policías cuando se abra el panel admin
-    const _origPaCargarAdmins = window.paCargarAdmins;
-    document.addEventListener('DOMContentLoaded', () => {
-      // patch panel admin card click
-      const panelAdminCard = document.getElementById('panel-admin-card');
-      if (panelAdminCard) {
-        const origClick = panelAdminCard.onclick;
-        panelAdminCard.addEventListener('click', () => {
-          setTimeout(() => { _inyectarTabPolicia(); }, 50);
-        });
-      }
-    });
 

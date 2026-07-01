@@ -104,64 +104,11 @@
       document.getElementById('profile-name').textContent = user.name;
       cargarPerfilDashboard();
 
-      // Verificar mi propio estado de admin contra la BD (action=verificar es
-      // accesible para cualquier sesión válida). Antes se usaba action=listar,
-      // que el backend reserva solo al super admin y devuelve 403 para el
-      // resto — por eso a los admins agregados nunca les aparecían sus
-      // paneles, y por eso a ti tampoco te aparecía el de Casino (que depende
-      // de user.esAdmin, valor que nunca llegaba a asignarse).
-      try {
-        const r = await fetch('/api/admin?action=verificar');
-        if (r.ok) {
-          const data = await r.json();
-          user.esAdmin = data.esAdmin;
-          user.esSuperAdmin = data.esSuperAdmin;
-        }
-      } catch {}
-
-      // Mostrar card admin banco si corresponde
-      const adminCard = document.getElementById('admin-card');
-      if (user.esAdmin) {
-        adminCard.style.display = 'flex';
-        adminCard.onclick = () => { abrirSeccion('admin-screen'); cargarAdminUsuarios(); };
-      } else {
-        adminCard.style.display = 'none';
-      }
-
-      // Mostrar card admin tienda si corresponde
-      const adminTiendaCard = document.getElementById('admin-tienda-card');
-      if (user.esAdmin) {
-        adminTiendaCard.style.display = 'flex';
-        adminTiendaCard.onclick = () => { abrirSeccion('admin-tienda-screen'); cargarAdminProductos(); };
-      } else {
-        adminTiendaCard.style.display = 'none';
-      }
-
-      // Mostrar card Panel Admin solo al super admin (verificado por el servidor)
-      const panelAdminCard = document.getElementById('panel-admin-card');
-      if (user.esSuperAdmin) {
-        panelAdminCard.style.display = 'flex';
-        panelAdminCard.onclick = () => { abrirSeccion('panel-admin-screen'); paCargarAdmins(); gpCargarPolicias(); };
-      } else {
-        panelAdminCard.style.display = 'none';
-      }
-
-      // Mostrar card Admin Casino a todos los admins
-      const adminCasinoCard = document.getElementById('admin-casino-card');
-      if (user.esAdmin) {
-        adminCasinoCard.style.display = 'flex';
-      } else {
-        adminCasinoCard.style.display = 'none';
-      }
-
-      // Mostrar card Administrar Empresas a todos los admins
-      const adminEmpresasCard = document.getElementById('admin-empresas-card');
-      if (user.esAdmin) {
-        adminEmpresasCard.style.display = 'flex';
-        adminEmpresasCard.onclick = () => { abrirSeccion('admin-empresas-screen'); cargarAdminEmpresas(); };
-      } else {
-        adminEmpresasCard.style.display = 'none';
-      }
+      // Nota: los antiguos paneles administrativos separados (Banco, Tienda,
+      // Empresas, Panel Admin, Casino) fueron reemplazados por los botones
+      // únicos "Staff" y "Admin" del nav-grid. La lógica de permisos vive en
+      // abrirPanelAdmin() (analiza acceso vía /api/admin?action=verificar)
+      // y abrirComisaria() (analiza acceso vía /api/comisaria?action=verificar).
 
       mostrarPantalla('dashboard');
       if (typeof notifIniciar === 'function') notifIniciar();
@@ -222,6 +169,76 @@
       _navegandoProgramaticamente = true;
       window.history.pushState({ screen: id }, '', '/');
       setTimeout(() => { _navegandoProgramaticamente = false; }, 50);
+    }
+
+    // ── PANEL ADMIN: punto de entrada único ──────────────────────────────────
+    // Un solo botón "Admin" visible para todos en el dashboard. Al entrar se
+    // analiza el acceso contra el servidor (nunca se confía en el cliente):
+    // GET /api/admin?action=verificar responde { esAdmin, esSuperAdmin } según
+    // la tabla `admins`, que solo el super admin puede editar desde dentro de
+    // este mismo panel (agregando/quitando IDs de Discord).
+    let paEsAdmin = false;
+    let paEsSuperAdmin = false;
+
+    async function abrirPanelAdmin() {
+      abrirSeccion('panel-admin-screen');
+      document.getElementById('pa-acceso-loading').style.display = 'flex';
+      document.getElementById('pa-sin-acceso').style.display = 'none';
+      document.getElementById('pa-contenido').style.display = 'none';
+      const barra = document.getElementById('pa-barra-progreso');
+      barra.style.width = '0%';
+
+      setTimeout(() => { barra.style.width = '60%'; }, 100);
+      setTimeout(() => { barra.style.width = '85%'; }, 600);
+
+      try {
+        const r = await fetch('/api/admin?action=verificar');
+        const data = await r.json();
+        paEsAdmin = data.esAdmin || false;
+        paEsSuperAdmin = data.esSuperAdmin || false;
+      } catch {
+        paEsAdmin = false;
+        paEsSuperAdmin = false;
+      }
+
+      barra.style.width = '100%';
+      await new Promise(res => setTimeout(res, 500));
+      document.getElementById('pa-acceso-loading').style.display = 'none';
+
+      if (!paEsAdmin) {
+        document.getElementById('pa-sin-acceso').style.display = 'flex';
+        return;
+      }
+
+      document.getElementById('pa-contenido').style.display = 'flex';
+
+      // Gestionar admins (agregar/quitar por Discord ID) es exclusivo del
+      // super admin; el resto del panel es para cualquier admin autorizado.
+      const gestionAdmins = document.getElementById('pa-gestion-admins-wrap');
+      if (gestionAdmins) gestionAdmins.style.display = paEsSuperAdmin ? '' : 'none';
+      if (paEsSuperAdmin && typeof paCargarAdmins === 'function') paCargarAdmins();
+      if (typeof gpCargarPolicias === 'function') gpCargarPolicias();
+    }
+
+    function volverPanelAdmin() {
+      abrirPanelAdmin();
+    }
+
+    // Openers de las herramientas agrupadas dentro del Panel Admin. Cada una
+    // navega a su pantalla y dispara la carga de datos correspondiente.
+    function abrirAdminBanco() {
+      abrirSeccion('admin-screen');
+      if (typeof cargarAdminUsuarios === 'function') cargarAdminUsuarios();
+    }
+
+    function abrirAdminTiendaPanel() {
+      abrirSeccion('admin-tienda-screen');
+      if (typeof cargarAdminProductos === 'function') cargarAdminProductos();
+    }
+
+    function abrirAdminEmpresasPanel() {
+      abrirSeccion('admin-empresas-screen');
+      if (typeof cargarAdminEmpresas === 'function') cargarAdminEmpresas();
     }
 
     // Interceptar botón atrás del navegador/celular
@@ -489,33 +506,21 @@
 
       badgesWrap.innerHTML = `<span class="profile-badge pb-discord">@${escHtml(currentUser.tag || currentUser.name)}</span>`;
 
-      // DNI (para badge de RUT + biografía)
+      // DNI (solo para biografía; el badge de RUT ya no se muestra en el perfil)
       try {
         const res = await fetch('/api/dni');
         const data = await res.json();
         if (data.existe && data.dni) {
           currentDNI = data.dni;
-          badgesWrap.innerHTML += `<span class="profile-badge pb-rut">🪪 ${escHtml(data.dni.rut)}</span>`;
           bioText.textContent = data.dni.bio && data.dni.bio.trim()
             ? data.dni.bio
             : 'Sin biografía todavía. ¡Cuéntale a la ciudad quién eres!';
         } else {
           bioText.textContent = 'Crea tu cédula de identidad para poder editar tu biografía.';
-          badgesWrap.innerHTML += `<span class="profile-badge pb-sin-rut" onclick="abrirSeccion('registro-civil'); cargarDNI()">⚠️ Sin cédula</span>`;
         }
       } catch (e) {
         bioText.textContent = 'No se pudo cargar tu biografía.';
       }
-
-      // Logros desbloqueados
-      try {
-        const res = await fetch('/api/banco?action=logros');
-        const data = await res.json();
-        if (res.ok && Array.isArray(data.logros)) {
-          const obtenidos = data.logros.filter(l => l.obtenido).length;
-          badgesWrap.innerHTML += `<span class="profile-badge pb-logros" onclick="abrirSeccion('logros-screen'); cargarLogros()">🏅 ${obtenidos} Logros</span>`;
-        }
-      } catch (e) {}
 
       // Saldo bancario
       const balEl    = document.getElementById('profile-balance');
