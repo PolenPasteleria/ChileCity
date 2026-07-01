@@ -46,6 +46,22 @@ async function initTable(sql) {
   await sql`ALTER TABLE empresas ADD COLUMN IF NOT EXISTS dueno_avatar_url TEXT`;
   await sql`ALTER TABLE empresas ADD COLUMN IF NOT EXISTS dueno_discord_id TEXT`;
 
+  // ── Staff ──────────────────────────────────────────────────────────────
+  // Rol independiente de "admins": solo da acceso al Panel Staff (apartado
+  // "Staff" del dashboard). No tiene acceso al Panel Admin ni a ninguna de
+  // sus herramientas. Lo gestionan los admins desde el Panel Admin, igual
+  // que la Gestión de Policías Virtuales.
+  await sql`
+    CREATE TABLE IF NOT EXISTS staff (
+      id           SERIAL PRIMARY KEY,
+      discord_id   TEXT UNIQUE NOT NULL,
+      nombre       TEXT,
+      agregado_por_id     TEXT NOT NULL,
+      agregado_por_nombre TEXT,
+      created_at   TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
   schemaReady = true;
 }
 
@@ -77,6 +93,12 @@ export default async function handler(req, res) {
         esAdmin: rows.length > 0,
         esSuperAdmin,
       });
+    }
+
+    // ── GET: verificar si yo soy staff ────────────────────────────────────────
+    if (req.method === "GET" && action === "verificarStaff") {
+      const rows = await sql`SELECT id FROM staff WHERE discord_id = ${discord_id}`;
+      return res.status(200).json({ esStaff: rows.length > 0 });
     }
 
     // ── GET: listar todos los admins (solo super admin) ──────────────────────
@@ -308,6 +330,57 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: "Faltan campos" });
 
         await quitarLogro(sql, target_id.trim(), codigo);
+        return res.status(200).json({ ok: true });
+      }
+    }
+
+    // ══ STAFF (gestión desde el Panel Admin) ═══════════════════════════════
+    // Igual que empresas/logros: vive acá para no sumar otra Serverless
+    // Function. Accesible para cualquier admin (no solo el super admin),
+    // igual que la Gestión de Policías Virtuales. El rol "staff" solo da
+    // acceso al Panel Staff, nunca al Panel Admin.
+    if (action && action.startsWith("staff_admin_")) {
+      const adminRows = await sql`SELECT id FROM admins WHERE discord_id = ${discord_id}`;
+      const esAdmin = adminRows.length > 0;
+      if (!esAdmin) return res.status(403).json({ error: "No autorizado" });
+
+      // ── GET: listar / buscar staff ────────────────────────────────────────
+      if (req.method === "GET" && action === "staff_admin_listar") {
+        const q = (req.query.q || "").trim();
+        const rows = q
+          ? await sql`
+              SELECT * FROM staff
+              WHERE discord_id ILIKE ${"%" + q + "%"} OR nombre ILIKE ${"%" + q + "%"}
+              ORDER BY created_at DESC
+            `
+          : await sql`SELECT * FROM staff ORDER BY created_at DESC`;
+        return res.status(200).json({ staff: rows });
+      }
+
+      // ── POST: agregar staff ───────────────────────────────────────────────
+      if (req.method === "POST" && action === "staff_admin_agregar") {
+        const { target_id, nombre } = req.body || {};
+        if (!target_id || !target_id.trim())
+          return res.status(400).json({ error: "Falta target_id" });
+
+        const existe = await sql`SELECT id FROM staff WHERE discord_id = ${target_id.trim()}`;
+        if (existe.length > 0)
+          return res.status(409).json({ error: "Ese usuario ya es staff" });
+
+        const rows = await sql`
+          INSERT INTO staff (discord_id, nombre, agregado_por_id, agregado_por_nombre)
+          VALUES (${target_id.trim()}, ${nombre?.trim() || null}, ${discord_id}, ${session.name || session.tag || discord_id})
+          RETURNING *
+        `;
+        return res.status(201).json({ staff: rows[0] });
+      }
+
+      // ── DELETE: quitar staff ──────────────────────────────────────────────
+      if (req.method === "DELETE" && action === "staff_admin_eliminar") {
+        const { target_id } = req.query;
+        if (!target_id) return res.status(400).json({ error: "Falta target_id" });
+
+        await sql`DELETE FROM staff WHERE discord_id = ${target_id}`;
         return res.status(200).json({ ok: true });
       }
     }
