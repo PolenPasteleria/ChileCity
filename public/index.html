@@ -272,20 +272,20 @@
           <div><div class="card-title">Empresas</div><div class="card-sub">Negocios y facciones del servidor</div></div>
           <span class="card-arrow">›</span>
         </div>
-        <a href="#" class="nav-card" id="admin-card" style="display:none">
+        <div class="nav-card" id="staff-card" onclick="abrirComisaria()" style="--card-color:#a78bfa; --card-glow:rgba(167,139,250,0.15)">
           <div class="card-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
-          <div><div class="card-title">Administrar Banco</div><div class="card-sub">Panel de administración</div></div>
+          <div><div class="card-title" style="color:#a78bfa">Staff</div><div class="card-sub">Herramientas del equipo de staff</div></div>
           <span class="card-arrow">›</span>
-        </a>
-        <a href="#" class="nav-card" id="admin-tienda-card" style="display:none">
+        </div>
+        <div class="nav-card" id="admin-panel-card" onclick="abrirPanelAdmin()" style="--card-color:#f87171; --card-glow:rgba(248,113,113,0.15)">
           <div class="card-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg>
           </div>
-          <div><div class="card-title">Administrar Tienda</div><div class="card-sub">Panel de administración</div></div>
+          <div><div class="card-title" style="color:#f87171">Admin</div><div class="card-sub">Panel de administración general</div></div>
           <span class="card-arrow">›</span>
-        </a>
+        </div>
         <div class="nav-card" onclick="abrirSeccion('logros-screen'); cargarLogros()" style="--card-color:#fbbf24; --card-glow:rgba(251,191,36,0.15)">
           <div class="card-icon">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.6"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.5L7 22l5-3 5 3-1.5-8.5"/></svg>
@@ -293,28 +293,6 @@
           <div><div class="card-title" style="color:#fbbf24">Logros</div><div class="card-sub">Tus medallas e hitos en la ciudad</div></div>
           <span class="card-arrow">›</span>
         </div>
-
-        <a href="#" class="nav-card" id="admin-empresas-card" style="display:none; --card-color:#34d399; --card-glow:rgba(52,211,153,0.12)">
-          <div class="card-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.6"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 10h.01M15 10h.01M9 14h.01M15 14h.01"/></svg>
-          </div>
-          <div><div class="card-title" style="color:#34d399">Administrar Empresas</div><div class="card-sub">Panel de administración</div></div>
-          <span class="card-arrow">›</span>
-        </a>
-        <a href="#" class="nav-card" id="panel-admin-card" style="display:none; --card-color:#f87171; --card-glow:rgba(248,113,113,0.12)">
-          <div class="card-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/><path d="M18 11l2 2 4-4" stroke="#f87171"/></svg>
-          </div>
-          <div><div class="card-title" style="color:#f87171">Panel Admin</div><div class="card-sub">Gestión de administradores</div></div>
-          <span class="card-arrow">›</span>
-        </a>
-        <a href="#" class="nav-card" id="admin-casino-card" style="display:none; --card-color:#f59e0b; --card-glow:rgba(245,158,11,0.12)" onclick="abrirAdminCasino()">
-          <div class="card-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/><path d="M8 2l4 4 4-4"/></svg>
-          </div>
-          <div><div class="card-title" style="color:#f59e0b">Admin Casino</div><div class="card-sub">Gestión de partidos y apuestas</div></div>
-          <span class="card-arrow">›</span>
-        </a>
 
         <div class="nav-card" onclick="abrirComisaria()" style="--card-color:#38bdf8; --card-glow:rgba(56,189,248,0.12)">
           <div class="card-icon">
@@ -680,7 +658,7 @@
   <section class="screen seccion-screen" id="admin-screen">
     <div class="seccion-container" style="max-width:740px;">
       <div class="seccion-header">
-        <button class="sec-back" onclick="volverDashboard()">
+        <button class="sec-back" onclick="volverPanelAdmin()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
           Volver
         </button>
@@ -908,7 +886,7 @@
   <section class="screen seccion-screen" id="admin-tienda-screen">
     <div class="seccion-container" style="max-width:740px;">
       <div class="seccion-header">
-        <button class="sec-back" onclick="volverDashboard()">
+        <button class="sec-back" onclick="volverPanelAdmin()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
           Volver
         </button>
@@ -1361,7 +1339,7 @@
   <section class="screen seccion-screen" id="admin-casino-screen">
     <div class="admin-casino-container">
       <div class="seccion-header">
-        <button class="sec-back" onclick="volverDashboard()">
+        <button class="sec-back" onclick="volverPanelAdmin()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
           Volver
         </button>
@@ -1629,7 +1607,7 @@
   <section class="screen seccion-screen" id="admin-empresas-screen">
     <div class="seccion-container" style="max-width:740px;">
       <div class="seccion-header">
-        <button class="sec-back" onclick="volverDashboard()">
+        <button class="sec-back" onclick="volverPanelAdmin()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
           Volver
         </button>
@@ -1753,7 +1731,12 @@
     </div>
   </div>
 
-  <!-- PANEL ADMIN (solo super admin) -->
+  <!-- PANEL ADMIN — hub central del staff. Verifica acceso al entrar
+       (GET /api/admin?action=verificar) y a partir de ahí da acceso a
+       Admin Banco/Tienda/Empresas/Casino. La gestión de administradores
+       (agregar/quitar por Discord ID) sigue siendo exclusiva del super
+       admin; el resto de las herramientas están disponibles para
+       cualquier admin autorizado. -->
   <section class="screen seccion-screen" id="panel-admin-screen">
     <div class="seccion-container" style="max-width:700px;">
       <div class="seccion-header">
@@ -1767,6 +1750,56 @@
         </div>
       </div>
 
+      <!-- Analizando acceso -->
+      <div id="pa-acceso-loading" style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:60px 0;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#f87171;">Analizando tu acceso...</div>
+        <div style="width:100%;max-width:360px;background:rgba(255,255,255,0.06);border-radius:99px;height:8px;overflow:hidden;">
+          <div id="pa-barra-progreso" style="height:100%;width:0%;background:linear-gradient(90deg,#dc2626,#f87171);border-radius:99px;transition:width 1.2s cubic-bezier(0.16,1,0.3,1);"></div>
+        </div>
+        <p style="color:rgba(255,255,255,0.35);font-size:13px;">Verificando identidad de Discord...</p>
+      </div>
+
+      <!-- Sin acceso -->
+      <div id="pa-sin-acceso" style="display:none;flex-direction:column;align-items:center;gap:20px;text-align:center;padding:60px 24px;">
+        <div style="font-size:56px;filter:drop-shadow(0 0 28px rgba(220,30,30,0.55));">🚫</div>
+        <div>
+          <div style="font-size:18px;font-weight:700;color:#fff;">No tienes acceso al Panel Admin</div>
+          <div style="font-size:14px;color:rgba(255,255,255,0.4);max-width:360px;margin-top:10px;line-height:1.6;">Solo el staff autorizado puede administrar el servidor. Si crees que deberías tener acceso, contacta a un administrador en Discord para que agregue tu ID.</div>
+        </div>
+        <button class="sec-back" onclick="volverDashboard()" style="margin-top:4px;">Volver al Dashboard</button>
+      </div>
+
+      <!-- Contenido (oculto hasta terminar la verificación) -->
+      <div id="pa-contenido" style="display:none;flex-direction:column;">
+
+      <!-- Herramientas de administración -->
+      <div id="pa-herramientas" style="margin-bottom:28px;">
+        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#fff;letter-spacing:1px;margin:0 0 14px 0;">Herramientas</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">
+          <div onclick="abrirAdminBanco()" style="cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:18px 16px;display:flex;flex-direction:column;gap:8px;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="3"/><path d="M1 10h22"/></svg>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;letter-spacing:.5px;">Admin Banco</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.4);">Saldos y sueldos</div>
+          </div>
+          <div onclick="abrirAdminTiendaPanel()" style="cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:18px 16px;display:flex;flex-direction:column;gap:8px;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;letter-spacing:.5px;">Admin Tienda</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.4);">Productos e inventarios</div>
+          </div>
+          <div onclick="abrirAdminEmpresasPanel()" style="cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:18px 16px;display:flex;flex-direction:column;gap:8px;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.8"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;letter-spacing:.5px;">Admin Empresas</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.4);">Negocios del servidor</div>
+          </div>
+          <div onclick="abrirAdminCasino()" style="cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:18px 16px;display:flex;flex-direction:column;gap:8px;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;letter-spacing:.5px;">Admin Casino</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.4);">Partidos de apuestas</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="pa-gestion-admins-wrap">
       <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.25);border-radius:12px;padding:16px 20px;margin-bottom:24px;">
         <p style="color:#fca5a5;font-size:13px;margin:0;line-height:1.6;">
           Desde aquí puedes gestionar los administradores del sistema. Puedes agregar hasta <strong>4 admins adicionales</strong> aparte de ti. Tendrán acceso completo al Admin Banco, Admin Tienda y este Panel Admin.
@@ -1802,6 +1835,7 @@
           <div id="pa-msg" style="font-size:13px;text-align:center;min-height:18px;"></div>
         </div>
       </div>
+      </div><!-- /pa-gestion-admins-wrap -->
 
       <!-- Enviar notificación a usuarios -->
       <div id="pn-wrap" style="margin-top:32px;border-top:1px solid rgba(99,102,241,0.18);padding-top:28px;">
@@ -1882,6 +1916,7 @@
         </div>
         <div id="al-lista" style="margin-top:14px;"></div>
       </div>
+      </div><!-- /pa-contenido -->
     </div>
   </section>
 
