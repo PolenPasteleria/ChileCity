@@ -152,3 +152,160 @@
 /* Loading / skeleton */
 #comisaria-screen .spinner{border-top-color:var(--cv-gold);}
 
+
+/* ══════════════════════════════════════════════════════════════
+   COMISARÍA VIRTUAL — Rediseño: Hero + Trámites (v26)
+   ══════════════════════════════════════════════════════════════ */
+#comisaria-screen{padding:0;}
+#comisaria-screen .seccion-header{display:none;} /* header antiguo ya no se usa */
+
+/* Barra superior fija (Volver / Panel Policial) */
+#comisaria-screen .cv-nav{
+  position:fixed;top:0;left:0;right:0;z-index:45;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 22px;
+  background:rgba(6,14,10,0.72);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(63,182,115,0.16);
+}
+#comisaria-screen .cv-nav-back{
+  display:flex;align-items:center;gap:6px;flex-shrink:0;
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);
+  color:#fff;border-radius:999px;padding:9px 16px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:.2s;font-family:Inter,sans-serif;
+}
+#comisaria-screen .cv-nav-back:hover{background:rgba(255,255,255,0.15);}
+#comisaria-screen .cv-nav-logo{
+  display:flex;align-items:center;gap:8px;position:absolute;left:50%;transform:translateX(-50%);
+  pointer-events:none;
+}
+#comisaria-screen .cv-nav-logo img{width:24px;height:24px;object-fit:contain;}
+#comisaria-screen .cv-nav-logo span{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:#fff;}
+#comisaria-screen .cv-nav-panel{
+  display:flex;align-items:center;gap:6px;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(30,138,76,0.32),rgba(201,162,39,0.2));
+  border:1px solid rgba(63,182,115,0.5);color:#e6c34a;
+  border-radius:999px;padding:9px 16px;font-size:13px;font-weight:700;
+  cursor:pointer;transition:.2s;font-family:Inter,sans-serif;
+}
+#comisaria-screen .cv-nav-panel:hover{background:linear-gradient(135deg,rgba(30,138,76,0.45),rgba(201,162,39,0.3));}
+@media (max-width:640px){
+  #comisaria-screen .cv-nav-logo{display:none;}
+  #comisaria-screen .cv-nav{padding:12px 14px;}
+  #comisaria-screen .cv-nav-back,#comisaria-screen .cv-nav-panel{padding:9px 12px;font-size:12px;}
+}
+
+/* Vistas internas: solo una visible a la vez */
+#comisaria-screen .cv-vista{display:none;width:100%;}
+#comisaria-screen .cv-vista.cv-vista-activa{display:block;}
+
+/* ── Hero (foto Carabineros de fondo) ─────────────────────────── */
+#comisaria-screen .cv-hero{
+  position:relative;width:100%;min-height:100vh;display:flex;align-items:flex-end;overflow:hidden;
+}
+#comisaria-screen .cv-hero-img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:brightness(.55) saturate(1.05);
+}
+#comisaria-screen .cv-hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(6,20,12,.20) 0%,rgba(6,20,12,.55) 55%,rgba(4,14,8,.94) 100%);
+}
+#comisaria-screen .cv-hero-content{
+  position:relative;z-index:2;width:100%;max-width:760px;margin:0 auto;
+  padding:0 28px 76px;display:flex;flex-direction:column;align-items:flex-start;gap:16px;
+  animation:fadeUp .9s var(--ease) both;
+}
+#comisaria-screen .cv-hero-emblema{
+  width:62px;height:62px;border-radius:50%;background:rgba(6,20,12,.55);
+  border:1.5px solid rgba(201,162,39,0.5);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 26px rgba(30,138,76,.4);margin-bottom:2px;
+}
+#comisaria-screen .cv-hero-emblema img{width:40px;height:40px;object-fit:contain;}
+#comisaria-screen .cv-hero-titulo{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,8vw,84px);line-height:.95;color:#fff;
+  text-shadow:0 4px 24px rgba(0,0,0,.5);
+}
+#comisaria-screen .cv-hero-desc{
+  font-size:15px;line-height:1.7;color:rgba(255,255,255,.78);max-width:520px;font-weight:300;
+}
+#comisaria-screen .cv-hero-btn{
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,#15803d,#1e8a4c);color:#fff;border:none;border-radius:14px;
+  padding:15px 30px;font-size:15px;font-weight:700;cursor:pointer;
+  box-shadow:0 8px 28px rgba(30,138,76,.45);transition:all .3s var(--ease);margin-top:6px;
+  font-family:Inter,sans-serif;
+}
+#comisaria-screen .cv-hero-btn:hover{
+  transform:translateY(-2px);box-shadow:0 10px 36px rgba(30,138,76,.6);
+  background:linear-gradient(135deg,#1e8a4c,#3fb673);
+}
+@media (max-width:540px){
+  #comisaria-screen .cv-hero-content{padding:0 20px 56px;gap:12px;}
+  #comisaria-screen .cv-hero-desc{font-size:13.5px;}
+  #comisaria-screen .cv-hero-btn{width:100%;justify-content:center;padding:14px 20px;}
+}
+
+/* ── Trámites: sección con fondo blanco ───────────────────────── */
+#comisaria-screen .cv-vista-blanca{
+  background:#f4f5f1;min-height:100vh;padding-top:78px;
+}
+#comisaria-screen .cv-white-section{
+  max-width:640px;margin:0 auto;padding:52px 24px 80px;
+  display:flex;flex-direction:column;gap:26px;color:#12160f;
+}
+#comisaria-screen .cv-white-header{display:flex;flex-direction:column;gap:6px;text-align:center;align-items:center;}
+#comisaria-screen .cv-eyebrow{
+  font-size:11px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#1e8a4c;
+}
+#comisaria-screen .cv-white-titulo{
+  font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:.5px;color:#0b3d24;
+}
+#comisaria-screen .cv-white-sub{font-size:13.5px;color:rgba(18,22,15,.55);}
+
+/* Botón central — Realizar Denuncia */
+#comisaria-screen .cv-tramite-central{
+  display:flex;align-items:center;gap:20px;width:100%;
+  background:linear-gradient(135deg,#15803d,#1e8a4c 55%,#237a4a);
+  border:none;border-radius:22px;padding:30px 32px;cursor:pointer;text-align:left;
+  box-shadow:0 14px 38px rgba(21,128,61,.28);transition:all .3s var(--ease);
+}
+#comisaria-screen .cv-tramite-central:hover{
+  transform:translateY(-3px);box-shadow:0 18px 46px rgba(21,128,61,.4);
+}
+#comisaria-screen .cv-tramite-central-icon{
+  flex-shrink:0;width:64px;height:64px;border-radius:16px;
+  background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;
+}
+#comisaria-screen .cv-tramite-central-texto{display:flex;flex-direction:column;gap:4px;text-align:left;}
+#comisaria-screen .cv-tramite-central-titulo{
+  font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.5px;color:#fff;
+}
+#comisaria-screen .cv-tramite-central-sub{font-size:13px;color:rgba(255,255,255,.82);}
+
+/* Botones secundarios — Mis Antecedentes / Mis Multas */
+#comisaria-screen .cv-tramites-secundarios{display:flex;flex-direction:column;gap:12px;}
+#comisaria-screen .cv-tramite-sec{
+  display:flex;align-items:center;gap:14px;width:100%;background:#fff;
+  border:1px solid rgba(11,61,36,.12);border-radius:16px;padding:16px 18px;
+  cursor:pointer;text-align:left;transition:all .25s var(--ease);
+}
+#comisaria-screen .cv-tramite-sec:hover{
+  border-color:rgba(30,138,76,.4);box-shadow:0 6px 20px rgba(11,61,36,.08);transform:translateY(-2px);
+}
+#comisaria-screen .cv-tramite-sec-icon{
+  flex-shrink:0;width:42px;height:42px;border-radius:12px;
+  background:rgba(30,138,76,.1);color:#1e8a4c;display:flex;align-items:center;justify-content:center;
+}
+#comisaria-screen .cv-tramite-sec-texto{flex:1;display:flex;flex-direction:column;gap:2px;}
+#comisaria-screen .cv-tramite-sec-titulo{font-size:14.5px;font-weight:700;color:#0b3d24;}
+#comisaria-screen .cv-tramite-sec-sub{font-size:12px;color:rgba(18,22,15,.5);}
+#comisaria-screen .cv-tramite-sec-arrow{color:rgba(11,61,36,.3);flex-shrink:0;transition:.25s;}
+#comisaria-screen .cv-tramite-sec:hover .cv-tramite-sec-arrow{transform:translateX(3px);color:#1e8a4c;}
+
+@media (max-width:480px){
+  #comisaria-screen .cv-white-section{padding:40px 16px 64px;gap:20px;}
+  #comisaria-screen .cv-white-titulo{font-size:28px;}
+  #comisaria-screen .cv-tramite-central{padding:24px 20px;gap:14px;}
+  #comisaria-screen .cv-tramite-central-icon{width:52px;height:52px;}
+  #comisaria-screen .cv-tramite-central-titulo{font-size:20px;}
+}

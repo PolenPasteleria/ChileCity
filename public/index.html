@@ -2090,43 +2090,111 @@
        COMISARÍA VIRTUAL
        ═══════════════════════════════════════════════════════ -->
   <section class="screen seccion-screen cv-carabineros" id="comisaria-screen">
-    <div class="seccion-container" style="max-width:860px;">
 
-      <div class="cv-banner">
-        <div class="cv-banner-emblema">
-          <img src="/carabineros-logo.png" alt="Carabineros de Chile" style="width:52px;height:52px;object-fit:contain;">
-        </div>
-        <div class="cv-banner-texto">
-          <div class="cv-banner-eyebrow">Carabineros de Chile</div>
-          <div class="cv-banner-titulo">Comisaría Virtual</div>
-          <div class="cv-banner-sub">Orden y Patria — Trámites, denuncias y registro policial</div>
+    <!-- Barra superior fija: Volver + Panel Policial -->
+    <div class="cv-nav">
+      <button class="cv-nav-back" onclick="volverDashboard()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver
+      </button>
+      <div class="cv-nav-logo">
+        <img src="/carabineros-logo.png" alt="Carabineros de Chile">
+        <span>Comisaría Virtual</span>
+      </div>
+      <button class="cv-nav-panel" id="cv-btn-panel" style="display:none;" onclick="cvAbrirPanel()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 3v6c0 5-3 8.5-7 10-4-1.5-7-5-7-10V5l7-3z"/></svg>
+        Panel Policial
+      </button>
+    </div>
+
+    <!-- Loading de acceso -->
+    <div id="cv-acceso-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;min-height:100vh;width:100%;padding:60px 24px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#3fb673;">Analizando tu acceso...</div>
+      <div style="width:100%;max-width:360px;background:rgba(255,255,255,0.06);border-radius:99px;height:8px;overflow:hidden;">
+        <div id="cv-barra-progreso" style="height:100%;width:0%;background:linear-gradient(90deg,#15803d,#c9a227);border-radius:99px;transition:width 1.2s cubic-bezier(0.16,1,0.3,1);"></div>
+      </div>
+      <p style="color:rgba(255,255,255,0.35);font-size:13px;">Verificando identidad de Discord...</p>
+    </div>
+
+    <!-- Contenido principal (oculto hasta terminar verificación) -->
+    <div id="cv-contenido" style="display:none;width:100%;flex-direction:column;">
+
+      <!-- ══ VISTA: LANDING (hero con foto) ══════════════════════ -->
+      <div class="cv-vista cv-vista-landing" id="cv-vista-landing">
+        <div class="cv-hero">
+          <img src="/cv-hero.png" alt="Carabineros de Chile" class="cv-hero-img">
+          <div class="cv-hero-overlay"></div>
+          <div class="cv-hero-content">
+            <div class="cv-hero-emblema">
+              <img src="/carabineros-logo.png" alt="Carabineros de Chile">
+            </div>
+            <h1 class="cv-hero-titulo">Bienvenidos</h1>
+            <p class="cv-hero-desc">Esta es la comisaría virtual de Chile City. Aquí podrás realizar tus trámites, consultar tu situación policial y presentar denuncias de forma segura.</p>
+            <button class="cv-hero-btn" onclick="cvSetVista('inicio')">
+              Iniciar trámites
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="seccion-header">
-        <button class="sec-back" onclick="volverDashboard()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-          Volver
-        </button>
-      </div>
+      <!-- ══ VISTA: INICIO / TRÁMITES (fondo blanco) ═════════════ -->
+      <div class="cv-vista cv-vista-blanca" id="cv-vista-inicio">
+        <div class="cv-white-section">
+          <div class="cv-white-header">
+            <div class="cv-eyebrow">Carabineros de Chile</div>
+            <h2 class="cv-white-titulo">Realiza tus Trámites</h2>
+            <p class="cv-white-sub">Selecciona una opción para continuar.</p>
+          </div>
 
-      <!-- Loading de acceso -->
-      <div id="cv-acceso-loading" style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:60px 0;">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#3fb673;">Analizando tu acceso...</div>
-        <div style="width:100%;max-width:360px;background:rgba(255,255,255,0.06);border-radius:99px;height:8px;overflow:hidden;">
-          <div id="cv-barra-progreso" style="height:100%;width:0%;background:linear-gradient(90deg,#15803d,#c9a227);border-radius:99px;transition:width 1.2s cubic-bezier(0.16,1,0.3,1);"></div>
+          <!-- Botón central: Realizar Denuncia -->
+          <button class="cv-tramite-central" onclick="cvSetVista('denuncia')">
+            <span class="cv-tramite-central-icon">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            <span class="cv-tramite-central-texto">
+              <span class="cv-tramite-central-titulo">Realizar Denuncia</span>
+              <span class="cv-tramite-central-sub">Reporta un delito o situación a Carabineros</span>
+            </span>
+          </button>
+
+          <!-- Botones secundarios -->
+          <div class="cv-tramites-secundarios">
+            <button class="cv-tramite-sec" onclick="cvSetVista('mis-antecedentes')">
+              <span class="cv-tramite-sec-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-3"/></svg>
+              </span>
+              <span class="cv-tramite-sec-texto">
+                <span class="cv-tramite-sec-titulo">Mis Antecedentes</span>
+                <span class="cv-tramite-sec-sub">Consulta tu ficha policial</span>
+              </span>
+              <svg class="cv-tramite-sec-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <button class="cv-tramite-sec" onclick="cvSetVista('mis-multas')">
+              <span class="cv-tramite-sec-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L11 3.83A2 2 0 009.59 3.24L3 3v6.59a2 2 0 00.59 1.41l9.59 9.59a2 2 0 002.82 0l4.59-4.59a2 2 0 000-2.82z"/><circle cx="7.5" cy="7.5" r="1" fill="currentColor" stroke="none"/></svg>
+              </span>
+              <span class="cv-tramite-sec-texto">
+                <span class="cv-tramite-sec-titulo">Mis Multas</span>
+                <span class="cv-tramite-sec-sub">Revisa tus multas y su estado</span>
+              </span>
+              <svg class="cv-tramite-sec-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
         </div>
-        <p style="color:rgba(255,255,255,0.35);font-size:13px;">Verificando identidad de Discord...</p>
       </div>
 
-      <!-- Contenido principal (oculto hasta terminar verificación) -->
-      <div id="cv-contenido" style="display:none;width:100%;flex-direction:column;gap:20px;">
-
-        <!-- Tabs navegación -->
-        <div class="admin-tabs" id="cv-tabs" style="flex-wrap:wrap;"></div>
-
-        <!-- ── MIS MULTAS ───────────────────────────────────────────── -->
-        <div class="admin-seccion" id="cv-tab-mis-multas" style="gap:14px;">
+      <!-- ══ VISTA: MIS MULTAS ═══════════════════════════════════ -->
+      <div class="cv-vista" id="cv-vista-mis-multas">
+        <div class="seccion-container" style="max-width:680px;">
+          <button class="sec-back" onclick="cvSetVista('inicio')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Volver a trámites
+          </button>
+          <h2 class="seccion-title" style="font-size:24px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L11 3.83A2 2 0 009.59 3.24L3 3v6.59a2 2 0 00.59 1.41l9.59 9.59a2 2 0 002.82 0l4.59-4.59a2 2 0 000-2.82z"/><circle cx="7.5" cy="7.5" r="1" fill="currentColor" stroke="none"/></svg>
+            Mis Multas
+          </h2>
           <div class="rc-loading" id="cv-mis-multas-loading">
             <div class="skeleton-wrap" style="width:100%;">
               <div class="skeleton-card">
@@ -2141,11 +2209,21 @@
               </div>
             </div>
           </div>
-          <div id="cv-mis-multas-lista"></div>
+          <div id="cv-mis-multas-lista" style="width:100%;display:flex;flex-direction:column;gap:12px;"></div>
         </div>
+      </div>
 
-        <!-- ── MIS ANTECEDENTES ────────────────────────────────────── -->
-        <div class="admin-seccion" id="cv-tab-mis-antecedentes" style="gap:14px;">
+      <!-- ══ VISTA: MIS ANTECEDENTES ═════════════════════════════ -->
+      <div class="cv-vista" id="cv-vista-mis-antecedentes">
+        <div class="seccion-container" style="max-width:680px;">
+          <button class="sec-back" onclick="cvSetVista('inicio')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Volver a trámites
+          </button>
+          <h2 class="seccion-title" style="font-size:24px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-3"/></svg>
+            Mis Antecedentes
+          </h2>
           <div class="rc-loading" id="cv-mis-antec-loading">
             <div class="skeleton-wrap" style="width:100%;">
               <div class="skeleton-card" style="flex-direction:row;gap:16px;">
@@ -2164,11 +2242,17 @@
               </div>
             </div>
           </div>
-          <div id="cv-mis-antec-lista"></div>
+          <div id="cv-mis-antec-lista" style="width:100%;display:flex;flex-direction:column;gap:12px;"></div>
         </div>
+      </div>
 
-        <!-- ── REALIZAR DENUNCIA ───────────────────────────────────── -->
-        <div class="admin-seccion" id="cv-tab-denuncia" style="gap:14px;">
+      <!-- ══ VISTA: REALIZAR DENUNCIA ════════════════════════════ -->
+      <div class="cv-vista" id="cv-vista-denuncia">
+        <div class="seccion-container" style="max-width:680px;">
+          <button class="sec-back" onclick="cvSetVista('inicio')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Volver a trámites
+          </button>
           <div class="rc-form" style="gap:16px;">
             <h2 style="font-size:18px;display:flex;align-items:center;gap:8px;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -2198,141 +2282,164 @@
             </button>
           </div>
         </div>
+      </div>
 
-        <!-- ══ PANEL POLICIAL (solo policías) ══════════════════════════ -->
+      <!-- ══ VISTA: PANEL POLICIAL (solo policías) ═══════════════ -->
+      <div class="cv-vista" id="cv-vista-panel">
+        <div class="seccion-container" style="max-width:900px;">
+          <button class="sec-back" onclick="cvSetVista('inicio')" style="margin-bottom:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Volver a trámites
+          </button>
 
-        <!-- ── AGREGAR MULTA ──────────────────────────────────────── -->
-        <div class="admin-seccion cv-policia-tab" id="cv-tab-agregar-multa" style="gap:14px;">
-          <div class="rc-form" style="gap:16px;">
-            <h2 style="font-size:18px;display:flex;align-items:center;gap:8px;color:#fbbf24;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Agregar Multa
-            </h2>
-            <div class="form-group">
-              <label>Buscar Ciudadano</label>
-              <div style="display:flex;gap:8px;">
-                <input type="text" id="multa-buscar" placeholder="Nombre, DNI o Discord ID" style="flex:1;">
-                <button onclick="cvBuscarCiudadano('multa')" style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:0 16px;color:#fbbf24;cursor:pointer;font-size:13px;white-space:nowrap;">Buscar</button>
-              </div>
-              <div id="multa-buscar-resultados" style="margin-top:8px;display:none;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;"></div>
+          <div class="cv-banner">
+            <div class="cv-banner-emblema">
+              <img src="/carabineros-logo.png" alt="Carabineros de Chile" style="width:52px;height:52px;object-fit:contain;">
             </div>
-            <div class="form-group">
-              <label>Ciudadano seleccionado</label>
-              <input type="text" id="multa-ciudadano-nombre" placeholder="— Selecciona desde la búsqueda —" readonly style="opacity:0.7;">
-              <input type="hidden" id="multa-ciudadano-id">
-              <input type="hidden" id="multa-ciudadano-dni">
+            <div class="cv-banner-texto">
+              <div class="cv-banner-eyebrow">Carabineros de Chile</div>
+              <div class="cv-banner-titulo">Panel Policial</div>
+              <div class="cv-banner-sub">Multas, antecedentes, denuncias y logs de la institución</div>
             </div>
-            <div class="form-group">
-              <label>Motivo</label>
-              <input type="text" id="multa-motivo" placeholder="Motivo de la multa">
-            </div>
-            <div class="form-row">
+          </div>
+
+          <!-- Tabs navegación panel policial -->
+          <div class="admin-tabs" id="cv-tabs" style="flex-wrap:wrap;"></div>
+
+          <!-- ── AGREGAR MULTA ──────────────────────────────────────── -->
+          <div class="admin-seccion" id="cv-tab-agregar-multa" style="gap:14px;">
+            <div class="rc-form" style="gap:16px;">
+              <h2 style="font-size:18px;display:flex;align-items:center;gap:8px;color:#fbbf24;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Agregar Multa
+              </h2>
               <div class="form-group">
-                <label>Valor ($)</label>
-                <input type="number" id="multa-valor" placeholder="Ej: 50000" min="1">
+                <label>Buscar Ciudadano</label>
+                <div style="display:flex;gap:8px;">
+                  <input type="text" id="multa-buscar" placeholder="Nombre, DNI o Discord ID" style="flex:1;">
+                  <button onclick="cvBuscarCiudadano('multa')" style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:0 16px;color:#fbbf24;cursor:pointer;font-size:13px;white-space:nowrap;">Buscar</button>
+                </div>
+                <div id="multa-buscar-resultados" style="margin-top:8px;display:none;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;"></div>
               </div>
               <div class="form-group">
-                <label>Fecha límite de pago</label>
-                <input type="date" id="multa-fecha-limite">
+                <label>Ciudadano seleccionado</label>
+                <input type="text" id="multa-ciudadano-nombre" placeholder="— Selecciona desde la búsqueda —" readonly style="opacity:0.7;">
+                <input type="hidden" id="multa-ciudadano-id">
+                <input type="hidden" id="multa-ciudadano-dni">
               </div>
-            </div>
-            <div class="rc-error" id="multa-error"></div>
-            <div class="rc-error" id="multa-ok" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:#4ade80;display:none;"></div>
-            <button onclick="cvAgregarMulta()" style="background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(251,191,36,0.1));border:1px solid rgba(251,191,36,0.35);border-radius:12px;padding:13px;color:#fbbf24;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:0.5px;display:flex;align-items:center;justify-content:center;gap:8px;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L11 3.83A2 2 0 009.59 3.24L3 3v6.59a2 2 0 00.59 1.41l9.59 9.59a2 2 0 002.82 0l4.59-4.59a2 2 0 000-2.82z"/><circle cx="7.5" cy="7.5" r="1" fill="currentColor" stroke="none"/></svg>
-              Emitir Multa
-            </button>
-          </div>
-        </div>
-
-        <!-- ── BASE DE DATOS MULTAS ──────────────────────────────── -->
-        <div class="admin-seccion cv-policia-tab" id="cv-tab-bd-multas" style="gap:14px;">
-          <div style="display:flex;gap:8px;">
-            <input type="text" id="bd-multas-q" placeholder="Buscar por nombre, DNI o Discord ID" style="flex:1;">
-            <button onclick="cvCargarBDMultas()" style="background:rgba(30,138,76,0.15);border:1px solid rgba(30,138,76,0.3);border-radius:10px;padding:0 14px;color:#1e8a4c;cursor:pointer;font-size:13px;">Buscar</button>
-          </div>
-          <div class="rc-loading" id="cv-bd-multas-loading" style="display:none;"><div class="spinner"></div><span>Cargando...</span></div>
-          <div id="cv-bd-multas-lista"></div>
-        </div>
-
-        <!-- ── AGREGAR ANTECEDENTE ───────────────────────────────── -->
-        <div class="admin-seccion cv-policia-tab" id="cv-tab-agregar-antec" style="gap:14px;">
-          <div class="rc-form" style="gap:16px;">
-            <h2 style="font-size:18px;display:flex;align-items:center;gap:8px;color:#f87171;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              Agregar Antecedente
-            </h2>
-            <div class="form-group">
-              <label>Buscar Ciudadano</label>
-              <div style="display:flex;gap:8px;">
-                <input type="text" id="antec-buscar" placeholder="Nombre, DNI o Discord ID" style="flex:1;">
-                <button onclick="cvBuscarCiudadano('antec')" style="background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);border-radius:10px;padding:0 16px;color:#f87171;cursor:pointer;font-size:13px;white-space:nowrap;">Buscar</button>
+              <div class="form-group">
+                <label>Motivo</label>
+                <input type="text" id="multa-motivo" placeholder="Motivo de la multa">
               </div>
-              <div id="antec-buscar-resultados" style="margin-top:8px;display:none;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;"></div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Valor ($)</label>
+                  <input type="number" id="multa-valor" placeholder="Ej: 50000" min="1">
+                </div>
+                <div class="form-group">
+                  <label>Fecha límite de pago</label>
+                  <input type="date" id="multa-fecha-limite">
+                </div>
+              </div>
+              <div class="rc-error" id="multa-error"></div>
+              <div class="rc-error" id="multa-ok" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:#4ade80;display:none;"></div>
+              <button onclick="cvAgregarMulta()" style="background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(251,191,36,0.1));border:1px solid rgba(251,191,36,0.35);border-radius:12px;padding:13px;color:#fbbf24;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:0.5px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L11 3.83A2 2 0 009.59 3.24L3 3v6.59a2 2 0 00.59 1.41l9.59 9.59a2 2 0 002.82 0l4.59-4.59a2 2 0 000-2.82z"/><circle cx="7.5" cy="7.5" r="1" fill="currentColor" stroke="none"/></svg>
+                Emitir Multa
+              </button>
             </div>
-            <div class="form-group">
-              <label>Ciudadano seleccionado</label>
-              <input type="text" id="antec-ciudadano-nombre" placeholder="— Selecciona desde la búsqueda —" readonly style="opacity:0.7;">
-              <input type="hidden" id="antec-ciudadano-id">
-              <input type="hidden" id="antec-ciudadano-dni">
-            </div>
-            <div class="form-group">
-              <label>URL Fotografía</label>
-              <input type="url" id="antec-foto" placeholder="https://...">
-            </div>
-            <div class="form-group">
-              <label>Motivo</label>
-              <input type="text" id="antec-motivo" placeholder="Motivo del antecedente">
-            </div>
-            <div class="form-group">
-              <label>Artículos infringidos</label>
-              <input type="text" id="antec-articulos" placeholder="Ej: Art. 3, Art. 14...">
-            </div>
-            <div class="form-group">
-              <label>Tiempo de cárcel</label>
-              <input type="text" id="antec-tiempo-carcel" placeholder="Ej: 2 horas, 30 minutos...">
-            </div>
-            <div class="rc-error" id="antec-error"></div>
-            <div class="rc-error" id="antec-ok" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:#4ade80;display:none;"></div>
-            <button onclick="cvAgregarAntecedente()" style="background:linear-gradient(135deg,rgba(248,113,113,0.2),rgba(248,113,113,0.1));border:1px solid rgba(248,113,113,0.35);border-radius:12px;padding:13px;color:#f87171;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:0.5px;display:flex;align-items:center;justify-content:center;gap:8px;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              Registrar Antecedente
-            </button>
           </div>
-        </div>
 
-        <!-- ── BASE DE DATOS ANTECEDENTES ───────────────────────── -->
-        <div class="admin-seccion cv-policia-tab" id="cv-tab-bd-antec" style="gap:14px;">
-          <div style="display:flex;gap:8px;">
-            <input type="text" id="bd-antec-q" placeholder="Buscar por nombre, DNI o Discord ID" style="flex:1;">
-            <button onclick="cvCargarBDAntecedentes()" style="background:rgba(30,138,76,0.15);border:1px solid rgba(30,138,76,0.3);border-radius:10px;padding:0 14px;color:#1e8a4c;cursor:pointer;font-size:13px;">Buscar</button>
+          <!-- ── BASE DE DATOS MULTAS ──────────────────────────────── -->
+          <div class="admin-seccion" id="cv-tab-bd-multas" style="gap:14px;">
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="bd-multas-q" placeholder="Buscar por nombre, DNI o Discord ID" style="flex:1;">
+              <button onclick="cvCargarBDMultas()" style="background:rgba(30,138,76,0.15);border:1px solid rgba(30,138,76,0.3);border-radius:10px;padding:0 14px;color:#1e8a4c;cursor:pointer;font-size:13px;">Buscar</button>
+            </div>
+            <div class="rc-loading" id="cv-bd-multas-loading" style="display:none;"><div class="spinner"></div><span>Cargando...</span></div>
+            <div id="cv-bd-multas-lista"></div>
           </div>
-          <div class="rc-loading" id="cv-bd-antec-loading" style="display:none;"><div class="spinner"></div><span>Cargando...</span></div>
-          <div id="cv-bd-antec-lista"></div>
-        </div>
 
-        <!-- ── BASE DE DATOS DENUNCIAS ───────────────────────────── -->
-        <div class="admin-seccion cv-policia-tab" id="cv-tab-bd-denuncias" style="gap:14px;">
-          <div style="display:flex;gap:8px;">
-            <input type="text" id="bd-den-q" placeholder="Buscar por nombre, Discord ID o motivo" style="flex:1;">
-            <button onclick="cvCargarBDDenuncias()" style="background:rgba(30,138,76,0.15);border:1px solid rgba(30,138,76,0.3);border-radius:10px;padding:0 14px;color:#1e8a4c;cursor:pointer;font-size:13px;">Buscar</button>
+          <!-- ── AGREGAR ANTECEDENTE ───────────────────────────────── -->
+          <div class="admin-seccion" id="cv-tab-agregar-antec" style="gap:14px;">
+            <div class="rc-form" style="gap:16px;">
+              <h2 style="font-size:18px;display:flex;align-items:center;gap:8px;color:#f87171;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Agregar Antecedente
+              </h2>
+              <div class="form-group">
+                <label>Buscar Ciudadano</label>
+                <div style="display:flex;gap:8px;">
+                  <input type="text" id="antec-buscar" placeholder="Nombre, DNI o Discord ID" style="flex:1;">
+                  <button onclick="cvBuscarCiudadano('antec')" style="background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);border-radius:10px;padding:0 16px;color:#f87171;cursor:pointer;font-size:13px;white-space:nowrap;">Buscar</button>
+                </div>
+                <div id="antec-buscar-resultados" style="margin-top:8px;display:none;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;"></div>
+              </div>
+              <div class="form-group">
+                <label>Ciudadano seleccionado</label>
+                <input type="text" id="antec-ciudadano-nombre" placeholder="— Selecciona desde la búsqueda —" readonly style="opacity:0.7;">
+                <input type="hidden" id="antec-ciudadano-id">
+                <input type="hidden" id="antec-ciudadano-dni">
+              </div>
+              <div class="form-group">
+                <label>URL Fotografía</label>
+                <input type="url" id="antec-foto" placeholder="https://...">
+              </div>
+              <div class="form-group">
+                <label>Motivo</label>
+                <input type="text" id="antec-motivo" placeholder="Motivo del antecedente">
+              </div>
+              <div class="form-group">
+                <label>Artículos infringidos</label>
+                <input type="text" id="antec-articulos" placeholder="Ej: Art. 3, Art. 14...">
+              </div>
+              <div class="form-group">
+                <label>Tiempo de cárcel</label>
+                <input type="text" id="antec-tiempo-carcel" placeholder="Ej: 2 horas, 30 minutos...">
+              </div>
+              <div class="rc-error" id="antec-error"></div>
+              <div class="rc-error" id="antec-ok" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:#4ade80;display:none;"></div>
+              <button onclick="cvAgregarAntecedente()" style="background:linear-gradient(135deg,rgba(248,113,113,0.2),rgba(248,113,113,0.1));border:1px solid rgba(248,113,113,0.35);border-radius:12px;padding:13px;color:#f87171;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:0.5px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Registrar Antecedente
+              </button>
+            </div>
           </div>
-          <div class="rc-loading" id="cv-bd-den-loading" style="display:none;"><div class="spinner"></div><span>Cargando...</span></div>
-          <div id="cv-bd-den-lista"></div>
-        </div>
 
-        <!-- ── LOGS ─────────────────────────────────────────────── -->
-        <div class="admin-seccion cv-policia-tab" id="cv-tab-logs" style="gap:14px;">
-          <div style="display:flex;gap:8px;">
-            <input type="text" id="cv-logs-q" placeholder="Buscar por usuario, ID o acción" style="flex:1;">
-            <button onclick="cvCargarLogs()" style="background:rgba(30,138,76,0.15);border:1px solid rgba(30,138,76,0.3);border-radius:10px;padding:0 14px;color:#1e8a4c;cursor:pointer;font-size:13px;">Buscar</button>
+          <!-- ── BASE DE DATOS ANTECEDENTES ───────────────────────── -->
+          <div class="admin-seccion" id="cv-tab-bd-antec" style="gap:14px;">
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="bd-antec-q" placeholder="Buscar por nombre, DNI o Discord ID" style="flex:1;">
+              <button onclick="cvCargarBDAntecedentes()" style="background:rgba(30,138,76,0.15);border:1px solid rgba(30,138,76,0.3);border-radius:10px;padding:0 14px;color:#1e8a4c;cursor:pointer;font-size:13px;">Buscar</button>
+            </div>
+            <div class="rc-loading" id="cv-bd-antec-loading" style="display:none;"><div class="spinner"></div><span>Cargando...</span></div>
+            <div id="cv-bd-antec-lista"></div>
           </div>
-          <div class="rc-loading" id="cv-logs-loading" style="display:none;"><div class="spinner"></div><span>Cargando...</span></div>
-          <div id="cv-logs-lista"></div>
-        </div>
 
-      </div><!-- fin #cv-contenido -->
-    </div>
+          <!-- ── BASE DE DATOS DENUNCIAS ───────────────────────────── -->
+          <div class="admin-seccion" id="cv-tab-bd-denuncias" style="gap:14px;">
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="bd-den-q" placeholder="Buscar por nombre, Discord ID o motivo" style="flex:1;">
+              <button onclick="cvCargarBDDenuncias()" style="background:rgba(30,138,76,0.15);border:1px solid rgba(30,138,76,0.3);border-radius:10px;padding:0 14px;color:#1e8a4c;cursor:pointer;font-size:13px;">Buscar</button>
+            </div>
+            <div class="rc-loading" id="cv-bd-den-loading" style="display:none;"><div class="spinner"></div><span>Cargando...</span></div>
+            <div id="cv-bd-den-lista"></div>
+          </div>
+
+          <!-- ── LOGS ─────────────────────────────────────────────── -->
+          <div class="admin-seccion" id="cv-tab-logs" style="gap:14px;">
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="cv-logs-q" placeholder="Buscar por usuario, ID o acción" style="flex:1;">
+              <button onclick="cvCargarLogs()" style="background:rgba(30,138,76,0.15);border:1px solid rgba(30,138,76,0.3);border-radius:10px;padding:0 14px;color:#1e8a4c;cursor:pointer;font-size:13px;">Buscar</button>
+            </div>
+            <div class="rc-loading" id="cv-logs-loading" style="display:none;"><div class="spinner"></div><span>Cargando...</span></div>
+            <div id="cv-logs-lista"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- fin #cv-contenido -->
   </section>
 
   <!-- ══ GESTIÓN DE POLICÍAS (dentro del Panel Admin) ═════════════
