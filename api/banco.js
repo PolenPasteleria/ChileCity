@@ -109,7 +109,29 @@ async function initTables(sql) {
       UNIQUE(discord_id, rut)
     )
   `;
+  // La tabla "staff" vive originalmente en api/admin.js. Se re-declara acá
+  // (misma definición, CREATE TABLE IF NOT EXISTS) porque Admin Banco ahora
+  // también es accesible para el rol Staff, no solo para admins.
+  await sql`
+    CREATE TABLE IF NOT EXISTS staff (
+      id           SERIAL PRIMARY KEY,
+      discord_id   TEXT UNIQUE NOT NULL,
+      nombre       TEXT,
+      agregado_por_id     TEXT NOT NULL,
+      agregado_por_nombre TEXT,
+      created_at   TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
   schemaReady = true;
+}
+
+async function getStaffIds(sql) {
+  try {
+    const rows = await sql`SELECT discord_id FROM staff`;
+    return rows.map(r => r.discord_id);
+  } catch {
+    return [];
+  }
 }
 
 export default async function handler(req, res) {
@@ -127,6 +149,7 @@ export default async function handler(req, res) {
     await ensureStaffLogsSchema(sql);
 
     const ADMIN_IDS = await getAdminIds(sql);
+    const STAFF_IDS = await getStaffIds(sql);
     const { action } = req.query;
 
     // Identidad real del usuario: SIEMPRE viene de la cookie de sesión
@@ -138,6 +161,10 @@ export default async function handler(req, res) {
     const discord_id = session.id;
     const discord_name = session.name || session.tag || discord_id;
     const esAdmin = ADMIN_IDS.includes(discord_id);
+    // Staff tiene acceso a Admin Banco (saldos y sueldos), igual que un
+    // admin, pero sigue sin poder gestionar otros admins/staff.
+    const esStaff = STAFF_IDS.includes(discord_id);
+    const puedeAdminBanco = esAdmin || esStaff;
 
     // ── GET: estado de cuenta ────────────────────────────────────────────────
     if (req.method === "GET" && action === "cuenta") {
@@ -147,7 +174,7 @@ export default async function handler(req, res) {
       let targetId = discord_id;
       const { discord_id: discordIdQuery } = req.query;
       if (discordIdQuery && discordIdQuery !== discord_id) {
-        if (!esAdmin) return res.status(403).json({ error: "No autorizado" });
+        if (!puedeAdminBanco) return res.status(403).json({ error: "No autorizado" });
         targetId = discordIdQuery;
       }
 
@@ -319,7 +346,7 @@ export default async function handler(req, res) {
 
     // ── ADMIN: listar usuarios con cuenta ────────────────────────────────────
     if (req.method === "GET" && action === "admin_usuarios") {
-      if (!esAdmin)
+      if (!puedeAdminBanco)
         return res.status(403).json({ error: "No autorizado" });
 
       const rows = await sql`
@@ -336,7 +363,7 @@ export default async function handler(req, res) {
 
     // ── ADMIN: ajustar saldo ──────────────────────────────────────────────────
     if (req.method === "POST" && action === "admin_saldo") {
-      if (!esAdmin)
+      if (!puedeAdminBanco)
         return res.status(403).json({ error: "No autorizado" });
 
       const { discord_id_target, monto, descripcion } = req.body;
@@ -371,7 +398,7 @@ export default async function handler(req, res) {
 
     // ── ADMIN: resetear cuenta ────────────────────────────────────────────────
     if (req.method === "POST" && action === "admin_reset_cuenta") {
-      if (!esAdmin)
+      if (!puedeAdminBanco)
         return res.status(403).json({ error: "No autorizado" });
 
       const { discord_id_target } = req.body;
@@ -396,7 +423,7 @@ export default async function handler(req, res) {
 
     // ── ADMIN: crear sueldo ───────────────────────────────────────────────────
     if (req.method === "POST" && action === "admin_sueldo_crear") {
-      if (!esAdmin)
+      if (!puedeAdminBanco)
         return res.status(403).json({ error: "No autorizado" });
 
       const { discord_id_target, nombre, monto, dias } = req.body;
@@ -420,7 +447,7 @@ export default async function handler(req, res) {
 
     // ── ADMIN: eliminar sueldo ────────────────────────────────────────────────
     if (req.method === "DELETE" && action === "admin_sueldo_borrar") {
-      if (!esAdmin)
+      if (!puedeAdminBanco)
         return res.status(403).json({ error: "No autorizado" });
 
       const { sueldo_id } = req.query;

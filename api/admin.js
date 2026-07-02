@@ -88,6 +88,12 @@ export default async function handler(req, res) {
     const discord_id = session.id;
     const discord_name = session.name || session.tag || discord_id;
 
+    // Staff tiene acceso a Gestión de Logros y Administrar Empresas, igual
+    // que un admin, pero sigue sin poder gestionar admins/staff ni ver
+    // Logs de Staff (eso sigue siendo exclusivo de admins).
+    const staffGlobalRows = await sql`SELECT id FROM staff WHERE discord_id = ${discord_id}`;
+    const esStaffGlobal = staffGlobalRows.length > 0;
+
     // ── GET: verificar si yo soy admin ───────────────────────────────────────
     if (req.method === "GET" && action === "verificar") {
       const rows = await sql`SELECT * FROM admins WHERE discord_id = ${discord_id}`;
@@ -186,11 +192,12 @@ export default async function handler(req, res) {
       });
     }
 
-    // A partir de acá todas las acciones de empresas requieren ser admin.
+    // A partir de acá todas las acciones de empresas requieren ser admin
+    // o staff (Staff tiene acceso a Administrar Empresas desde su panel).
     if (action && action.startsWith("empresas_admin_")) {
       const adminRows = await sql`SELECT id FROM admins WHERE discord_id = ${discord_id}`;
       const esAdmin = adminRows.length > 0;
-      if (!esAdmin) return res.status(403).json({ error: "No autorizado" });
+      if (!esAdmin && !esStaffGlobal) return res.status(403).json({ error: "No autorizado" });
 
       // ── GET: listado paginado, incluye inactivas ────────────────────────
       if (req.method === "GET" && action === "empresas_admin_listar") {
@@ -312,7 +319,7 @@ export default async function handler(req, res) {
     if (action && action.startsWith("logros_admin_")) {
       const adminRows = await sql`SELECT id FROM admins WHERE discord_id = ${discord_id}`;
       const esAdmin = adminRows.length > 0;
-      if (!esAdmin) return res.status(403).json({ error: "No autorizado" });
+      if (!esAdmin && !esStaffGlobal) return res.status(403).json({ error: "No autorizado" });
 
       // ── GET: ver los logros de un usuario (por su Discord ID) ────────────
       if (req.method === "GET" && action === "logros_admin_usuario") {
